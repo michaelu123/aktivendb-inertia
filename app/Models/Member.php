@@ -81,9 +81,9 @@ class Member extends Model
             'police_certificate' => 'nullable|in:0,1,2',
         ];
 
-    protected $with = [
-        'user'
-    ];
+    // protected $with = [   // MUH With this, we add the user to a member if applicable, but why?
+    //     'user'
+    // ];
 
     public function getWithDetailsAttribute()
     {

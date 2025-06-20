@@ -15,7 +15,7 @@ class MemberController extends Controller
         return inertia(
             'Member/Index',
             [
-                "members" => Member::all()
+                "members" => Member::orderBy("last_name")->get()
             ]
         );
     }

@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
 import vue from "@vitejs/plugin-vue";
 import vuetify from "vite-plugin-vuetify";
+import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
@@ -31,4 +32,9 @@ export default defineConfig({
         tailwindcss(),
         vuetify({ autoImport: true }),
     ],
+    resolve: {
+        alias: {
+            ziggy: path.resolve("vendor/tightenco/ziggy/dist"),
+        },
+    },
 });
