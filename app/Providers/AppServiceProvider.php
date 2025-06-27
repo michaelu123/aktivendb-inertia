@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Member;
+use App\Models\ProjectTeam;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -24,19 +25,19 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('administer-users', function (User $user) {
-            return $user->isAdmin();
+            return $user->isAdmin;
         });
 
         Gate::define('add-edit-member', function (User $user) {
-            return $user->isAdmin();
+            return $user->isAdmin;
         });
 
         Gate::define('add-edit-project-team', function (User $user) {
-            return $user->isAdmin();
+            return $user->isAdmin;
         });
 
         Gate::define('see-member-details', function (User $user, int $member_id) {
-            if ($user->member_id == $member_id || $user->isAdmin()) {
+            if ($user->member_id == $member_id || $user->isAdmin) {
                 return true;
             }
 
@@ -75,38 +76,37 @@ class AppServiceProvider extends ServiceProvider
             return false;*/
         });
 
-        // TODO
-        // Gate::define('see-project-team-details', function (User $user, int $project_team_id) {
-        //     $project_team = ProjectTeam::find($project_team_id);
+        Gate::define('see-project-team-details', function (User $user, int $project_team_id) {
+            $project_team = ProjectTeam::find($project_team_id);
 
-        //     return ($user->isAdmin() || $user->has_ability('leserechte', $project_team));
-        // });
+            return ($user->isAdmin() || $user->has_ability('leserechte', $project_team));
+        });
 
-        // Gate::define('edit-member-details', function (User $user, int $member_id) {
-        //     if ($user->member_id == $member_id || $user->isAdmin()) {
-        //         return true;
-        //     }
+        Gate::define('edit-member-details', function (User $user, int $member_id) {
+            if ($user->member_id == $member_id || $user->isAdmin) {
+                return true;
+            }
 
-        //     $member = Member::with('project_teams')->find($member_id);
+            $member = Member::with('project_teams')->find($member_id);
 
-        //     foreach ($user->member()->with('project_teams')->first()->project_teams()->get() as $user_project_team) {
-        //         foreach ($member->project_teams()->get() as $member_project_team) {
-        //             if ($user_project_team->id == $member_project_team->id) {
-        //                 if ($user->has_ability('schreibrechte', $member_project_team)) {
-        //                     return true;
-        //                 }
-        //             }
-        //         }
-        //     }
+            foreach ($user->member()->with('project_teams')->first()->project_teams()->get() as $user_project_team) {
+                foreach ($member->project_teams()->get() as $member_project_team) {
+                    if ($user_project_team->id == $member_project_team->id) {
+                        if ($user->has_ability('schreibrechte', $member_project_team)) {
+                            return true;
+                        }
+                    }
+                }
+            }
 
-        //     return false;
-        // });
+            return false;
+        });
 
-        // Gate::define('edit-project-team-details', function (User $user, int $project_team_id) {
-        //     $project_team = ProjectTeam::find($project_team_id);
+        Gate::define('edit-project-team-details', function (User $user, int $project_team_id) {
+            $project_team = ProjectTeam::find($project_team_id);
 
-        //     return ($user->isAdmin() || $user->has_ability('schreibrechte', $project_team));
-        // });
+            return ($user->isAdmin || $user->has_ability('schreibrechte', $project_team));
+        });
 
         Gate::define('readhistory', function (User $user) {
             return $user->has_ability('readhistory');

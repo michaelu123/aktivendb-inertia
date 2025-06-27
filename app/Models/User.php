@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -24,7 +26,6 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'password',
-        'is_admin',
         'member_id',
     ];
 
@@ -37,6 +38,20 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    protected function isAdmin(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->has_ability("globale-schreibrechte")
+        )->shouldCache();
+    }
+    protected function mayReadHistory(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->has_ability("readhistory")
+        )->shouldCache();
+    }
+
 
     /**
      * Get the attributes that should be cast.
@@ -54,11 +69,6 @@ class User extends Authenticatable
     public function member()
     {
         return $this->belongsTo(Member::class);
-    }
-
-    public function isAdmin()
-    {
-        return !!$this->is_admin;
     }
 
     public function has_ability(string $ability_ref, ?ProjectTeam $project_team = null)
@@ -90,7 +100,7 @@ class User extends Authenticatable
 
     public function abilities()
     {
-        return $this->belongsToMany('App\Ability', 'ability_user')->whereNull('ability_user.deleted_at');
+        return $this->belongsToMany('App\Models\Ability', 'ability_user')->whereNull('ability_user.deleted_at');
     }
 }
 

@@ -6,7 +6,7 @@
             >
         </v-toolbar-title>
         <v-toolbar-items>
-            <v-btn variant="text" :to="route('index.index')"> Home </v-btn>
+            <v-btn variant="text" :to="route('home')"> Home </v-btn>
             <v-btn
                 variant="text"
                 :to="route('member.index')"
@@ -26,25 +26,22 @@
             <v-btn variant="text" to="/login" v-if="!is_logged_in">
                 <span class="font-weight-light">Login</span>
             </v-btn>
-            <v-btn variant="text" to="/logout" v-if="is_logged_in">
+            <v-btn variant="text" :to="route('logout')" v-if="is_logged_in">
                 <span class="font-weight-light">Logout</span>
             </v-btn>
         </v-toolbar-items>
     </v-toolbar>
 </template>
 
-<script>
-export default {
-    name: "Navigation",
-    computed: {
-        is_logged_in() {
-            return true; // this.$store.state.is_logged_in;
-        },
-        may_read_history() {
-            return true; // this.$store.state.may_read_history;
-        },
-    },
-};
-</script>
+<script setup>
+import { usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
 
-<style scoped></style>
+const page = usePage();
+const is_logged_in = computed(() => {
+    return !!page.props?.user;
+});
+const may_read_history = computed(() => {
+    return page.props?.user?.may_read_history;
+});
+</script>

@@ -1,13 +1,229 @@
-<template>
+<!-- <template>
     <v-data-table :headers="headers" :items="members"> </v-data-table>
+</template> -->
+
+<template>
+    <v-card>
+        <v-card-title>
+            <div>
+                <v-alert
+                    :type="alert.type"
+                    variant="outlined"
+                    v-model="alert.shown"
+                    closable
+                    width="100%"
+                >
+                    {{ alert.text }}
+                </v-alert>
+            </div>
+        </v-card-title>
+        <v-data-table
+            :headers="headers"
+            :items="members"
+            :search="r.search"
+            :loading="r.loading"
+            loading-text="Wird geladen..."
+            @click:row="viewItem"
+        >
+            <template v-slot:top>
+                <!-- <AddMemberToMembersDialog
+                    :editWindow="editWindow"
+                    :editedItem="editedItem"
+                    :memberRoles="memberRoles"
+                    :projectTeams="projectTeams"
+                    :allProjectTeams="allProjectTeams"
+                    :strictReadonly="strictReadonly"
+                    :checkForTrue="checkForTrue"
+                    :closeEditProjectTeamMemberWindow="
+                        closeEditProjectTeamMemberWindow
+                    "
+                    :handleRequestError="handleRequestError"
+                    @closeEW="closeEditWindow"
+                    @saveEW="saveEditWindow"
+                ></AddMemberToMembersDialog>
+                <HistoryDialog
+                    v-if="mayReadHistory() && history.shown"
+                    :projectTeams="allProjectTeams"
+                    :members="members"
+                    :history="history"
+                />
+                <v-spacer></v-spacer> -->
+                <v-row class="ml-2">
+                    <v-switch v-model="r.activeSwitch" label="Nur Aktive">
+                    </v-switch>
+                    &nbsp;&nbsp;&nbsp;
+                    <v-switch
+                        v-if="!isAdmin()"
+                        v-model="r.agSwitch"
+                        label="Nur AG/OG-Mitglieder"
+                    >
+                    </v-switch>
+                </v-row>
+                <v-spacer></v-spacer>
+
+                <v-sheet color="grey-lighten-3" align="center">
+                    <v-container>
+                        <p class="text-caption">Als Excel-Datei exportieren:</p>
+                        <v-row class="mt-2">
+                            <v-text-field
+                                type="text"
+                                variant="outlined"
+                                color="primary"
+                                label="Bitte Dateinamen eingeben"
+                                v-model="r.excelFileName"
+                            ></v-text-field>
+                            <v-menu offset_y>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn
+                                        variant="outlined"
+                                        color="primary"
+                                        height="60"
+                                        class="mx-4"
+                                        v-bind="props"
+                                    >
+                                        {{ r.preferredEmail }}
+                                    </v-btn>
+                                </template>
+                                <v-list>
+                                    <v-list-item
+                                        key="1"
+                                        @click="prefer('ADFC')"
+                                    >
+                                        <v-list-item-title
+                                            >ADFC-Email-Adresse</v-list-item-title
+                                        >
+                                    </v-list-item>
+                                    <v-list-item
+                                        key="2"
+                                        @click="prefer('Privat')"
+                                    >
+                                        <v-list-item-title
+                                            >Private
+                                            Email-Adresse</v-list-item-title
+                                        >
+                                    </v-list-item>
+                                </v-list>
+                            </v-menu>
+                            <v-progress-circular
+                                class="mr-4"
+                                v-if="r.loadingTeams"
+                                indeterminate
+                                color="primary"
+                            ></v-progress-circular>
+                            <v-btn
+                                height="60"
+                                color="primary"
+                                type="submit"
+                                variant="outlined"
+                                @click.prevent="exportExcel"
+                            >
+                                <v-icon start>mdi-file-excel</v-icon> Jetzt
+                                exportieren
+                            </v-btn>
+                        </v-row>
+                    </v-container>
+                </v-sheet>
+
+                <v-text-field
+                    v-model="r.search"
+                    label="Suchen"
+                    append-icon="mdi-magnify"
+                    single-line
+                    hide-details
+                    class="my-2"
+                ></v-text-field>
+            </template>
+            <template v-slot:item.action="{ item }">
+                <v-icon
+                    size="15px"
+                    @click.stop="editItem(item)"
+                    v-if="item.with_details"
+                    >mdi-pencil</v-icon
+                >
+                <v-icon
+                    size="15px"
+                    @click.stop="deleteItem(item)"
+                    v-if="isAdmin()"
+                    >mdi-delete</v-icon
+                >
+                <v-icon
+                    size="15px"
+                    @click.stop="historyItem(item)"
+                    v-if="mayReadHistory()"
+                    >mdi-history</v-icon
+                >
+            </template>
+            <template v-slot:item.active="{ item }">
+                <v-avatar
+                    color="green"
+                    size="24"
+                    v-if="checkForTrue(item.active)"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-marked-circle-outline
+                    </v-icon>
+                </v-avatar>
+                <v-avatar
+                    color="red"
+                    size="24"
+                    v-if="!checkForTrue(item.active)"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-blank-circle-outline
+                    </v-icon>
+                </v-avatar>
+            </template>
+            <template v-slot:item.registered_for_first_aid_training="{ item }">
+                <v-avatar
+                    color="green"
+                    size="24"
+                    v-if="checkForTrue(item.registered_for_first_aid_training)"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-marked-circle-outline
+                    </v-icon>
+                </v-avatar>
+                <v-avatar
+                    color="red"
+                    size="24"
+                    v-if="!checkForTrue(item.registered_for_first_aid_training)"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-blank-circle-outline
+                    </v-icon>
+                </v-avatar>
+            </template>
+            <template v-slot:item.responded_to_questionaire="{ item }">
+                <v-avatar
+                    color="green"
+                    size="24"
+                    v-if="checkForTrue(item.responded_to_questionaire)"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-marked-circle-outline
+                    </v-icon>
+                </v-avatar>
+                <v-avatar
+                    color="red"
+                    size="24"
+                    v-if="!checkForTrue(item.responded_to_questionaire)"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-blank-circle-outline
+                    </v-icon>
+                </v-avatar>
+            </template>
+        </v-data-table>
+    </v-card>
 </template>
 
 <script setup>
-import { toAbgegeben } from "@/utils";
+import { toAbgegeben, checkForTrue, makeSchema } from "@/utils";
+import { reactive } from "vue";
+import { router, usePage, useForm } from "@inertiajs/vue3";
+import writeXlsxFile from "write-excel-file";
 
-defineProps({ members: Array });
-let activeSwitch = false;
-let agSwitch = false;
+const props = defineProps({ members: Array });
 
 const headers = [
     {
@@ -20,9 +236,9 @@ const headers = [
         key: "active",
         filter: (value, _se, item) => {
             // could not get v-data-table.custom-filter to work
-            if (agSwitch && !item.raw.with_details) return false;
+            if (r.agSwitch && !item.raw.with_details) return false;
 
-            if (!activeSwitch) return true;
+            if (!r.activeSwitch) return true;
 
             return !!value;
         },
@@ -100,4 +316,108 @@ const headers = [
         value: (item) => toAbgegeben(item.police_certificate),
     },
 ];
+
+const r = reactive({
+    search: "",
+    activeSwitch: true,
+    agSwitch: false,
+    loading: false,
+    excelFileName: "",
+    preferredEmail: "Bevorzugte Email-Adresse",
+    loadingTeams: false,
+});
+
+const alert = reactive({
+    shown: false,
+    text: "",
+    type: "success",
+});
+
+const page = usePage();
+
+function isAdmin() {
+    return !!page.props.user.is_admin;
+}
+
+function mayReadHistory() {
+    return !!page.props.user.is_admin; // TODO
+}
+
+function showItem(item, readonly) {
+    router.get(route("member.show", { member: item.id, readonly }));
+    console.log("showItem", readonly);
+}
+function viewItem(ev, { item }) {
+    console.log("viewitem", item);
+    showItem(item, true);
+}
+function editItem(item) {
+    showItem(item, false);
+}
+
+async function exportExcel() {
+    if (r.excelFileName == "") {
+        showAlert("error", "Bitte Dateinamen eingeben");
+        return;
+    }
+    if (!r.excelFileName.endsWith(".xlsx")) {
+        r.excelFileName = r.excelFileName + ".xlsx";
+    }
+    if (r.preferredEmail == "Bevorzugte Email-Adresse") {
+        showAlert("error", "Bitte Email-Präferenz eingeben");
+        return;
+    }
+
+    let myMembers = [];
+    try {
+        r.loadingTeams = true;
+        for (let m of props.members) {
+            if (!m.with_details) continue;
+            try {
+                m.ags = await getMemberFromApi(m.id);
+                m.agAll = m.ags.join(",");
+                myMembers.push(m);
+                if (myMembers.length >= 10) break;
+            } catch (ex) {
+                console.log("ex!!", ex);
+            }
+        }
+    } finally {
+        r.loadingTeams = false;
+    }
+    const schema = makeSchema(myMembers, r.preferredEmail);
+
+    if (r.activeSwitch) {
+        myMembers = myMembers.filter((m) => m.active == "1");
+    }
+
+    await writeXlsxFile(myMembers, {
+        schema,
+        fileName: r.excelFileName,
+    });
+    r.excelFileName = "";
+}
+
+function prefer(t) {
+    console.log("prefer", t);
+    r.preferredEmail = "Bevorzugt: " + t;
+}
+
+function showAlert(type, text) {
+    alert.shown = true;
+    alert.type = type;
+    alert.text = text;
+
+    setTimeout(() => {
+        alert.shown = false;
+        r.loading = false;
+    }, 5000);
+}
+
+async function getMemberFromApi(id) {
+    const resp = await fetch("/member/" + id + "/teams");
+    const res = await resp.json();
+    console.log("res", res);
+    return res.teams;
+}
 </script>

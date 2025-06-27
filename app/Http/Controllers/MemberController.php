@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Member;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 class MemberController extends Controller
 {
@@ -39,9 +41,25 @@ class MemberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Member $member)
+    public function show(Member $member, Request $request)
     {
-        //
+        $readonly = !!$request->query("readonly", true);
+        return inertia(
+            'Member/Show',
+            ["member" => $member, "readonly" => $readonly]
+        );
+    }
+
+    public function teams(Request $request, int $member_id)
+    {
+        if (!Gate::allows('see-member-details', $member_id)) {
+            return [];
+        }
+        $m = Member::find($member_id);
+        // hack 
+        return [
+            "teams" => [$m->first_name, $m->last_name]
+        ];
     }
 
     /**

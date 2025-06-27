@@ -144,10 +144,10 @@ class Member extends Model
         return $this->hasOne(User::class);
     }
 
-    // public function project_teams()
-    // {
-    //     return $this->belongsToMany('App\ProjectTeam', 'project_team_member')->whereNull('project_team_member.deleted_at')->withPivot(['id', 'member_role_id', 'admin_comments'])->using('App\ProjectTeamMember')->as('project_team_member');
-    // }
+    public function project_teams()
+    {
+        return $this->belongsToMany('App\Models\ProjectTeam', 'project_team_member')->whereNull('project_team_member.deleted_at')->withPivot(['id', 'member_role_id', 'admin_comments'])->using('App\Models\ProjectTeamMember')->as('project_team_member');
+    }
 
 
 }
