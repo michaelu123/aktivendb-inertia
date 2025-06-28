@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use App\Observers\ProjectTeamMemberObserver;
+use App\Observers\ProjectTeamMemberObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class ProjectTeamMember extends Pivot
 {
   use SoftDeletes;
-  // use ProjectTeamMemberObserver;
+  use ProjectTeamMemberObserver;
 
   public $incrementing = true;
 

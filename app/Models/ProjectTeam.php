@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-// use App\Observers\ProjectTeamObserver;
+use App\Observers\ProjectTeamObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
@@ -10,7 +10,7 @@ class ProjectTeam extends Model
 {
 
   use SoftDeletes;
-  // use ProjectTeamObserver;
+  use ProjectTeamObserver;
 
   protected $appends = [
     'with_details'

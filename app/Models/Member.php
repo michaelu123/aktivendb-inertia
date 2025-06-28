@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\MemberObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Gate;
 class Member extends Model
 {
     use SoftDeletes;
-    // TODO use App\Observers\MemberObserver;
+    use MemberObserver;
 
     public $with_details = true;
 
