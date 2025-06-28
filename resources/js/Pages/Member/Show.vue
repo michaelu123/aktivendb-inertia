@@ -1,14 +1,4 @@
 <template>
-    <p>{{ $page }}</p>
-    <v-btn
-        color="primary"
-        variant="outlined"
-        class="mb-2 ml-2"
-        v-bind="props"
-        v-if="!readonly"
-    >
-        <v-icon start>mdi-plus</v-icon> Mitglied Hinzufügen
-    </v-btn>
     <v-card>
         <v-card-title>
             <div>
@@ -65,24 +55,24 @@
                         label="Nachname"
                         required
                         :readonly="readonly"
-                        :error="!!editWindow.errors.last_name"
-                        :error-messages="editWindow.errors.last_name"
+                        :error="!!editedItem.errors.last_name"
+                        :error-messages="editedItem.errors.last_name"
                     ></v-text-field>
                     <v-text-field
                         v-model="editedItem.first_name"
                         label="Vorname"
                         required
                         :readonly="readonly"
-                        :error="!!editWindow.errors.first_name"
-                        :error-messages="editWindow.errors.first_name"
+                        :error="!!editedItem.errors.first_name"
+                        :error-messages="editedItem.errors.first_name"
                     ></v-text-field>
                     <v-text-field
                         v-model="editedItem.birthday"
                         label="Geburtsjahr"
                         required
                         :readonly="readonly"
-                        :error="!!editWindow.errors.birthday"
-                        :error-messages="editWindow.errors.birthday"
+                        :error="!!editedItem.errors.birthday"
+                        :error-messages="editedItem.errors.birthday"
                     ></v-text-field>
 
                     <v-text-field
@@ -96,38 +86,38 @@
                                 'Bitte M oder W oder nichts angeben',
                         ]"
                         :readonly="readonly"
-                        :error="!!editWindow.errors.gender"
-                        :error-messages="editWindow.errors.gender"
+                        :error="!!editedItem.errors.gender"
+                        :error-messages="editedItem.errors.gender"
                     ></v-text-field>
 
                     <v-text-field
                         v-model="editedItem.email_adfc"
                         label="E-mail (ADFC)"
                         :readonly="readonly"
-                        :error="!!editWindow.errors.email_adfc"
-                        :error-messages="editWindow.errors.email_adfc"
+                        :error="!!editedItem.errors.email_adfc"
+                        :error-messages="editedItem.errors.email_adfc"
                     ></v-text-field>
                     <v-text-field
                         v-model="editedItem.email_private"
                         label="E-mail (Privat)"
                         required
                         :readonly="readonly"
-                        :error="!!editWindow.errors.email_private"
-                        :error-messages="editWindow.errors.email_private"
+                        :error="!!editedItem.errors.email_private"
+                        :error-messages="editedItem.errors.email_private"
                     ></v-text-field>
                     <v-text-field
                         v-model="editedItem.phone_primary"
                         label="Telefon"
                         :readonly="readonly"
-                        :error="!!editWindow.errors.phone_primary"
-                        :error-messages="editWindow.errors.phone_primary"
+                        :error="!!editedItem.errors.phone_primary"
+                        :error-messages="editedItem.errors.phone_primary"
                     ></v-text-field>
                     <v-text-field
                         v-model="editedItem.phone_secondary"
                         label="Telefon (alternativ)"
                         :readonly="readonly"
-                        :error="!!editWindow.errors.phone_secondary"
-                        :error-messages="editWindow.errors.phone_secondary"
+                        :error="!!editedItem.errors.phone_secondary"
+                        :error-messages="editedItem.errors.phone_secondary"
                     ></v-text-field>
                     <v-menu
                         v-model="editWindow.showLatestContactDatePicker"
@@ -144,14 +134,14 @@
                                 prepend-icon="mdi-calendar-edit"
                                 readonly
                                 v-bind="props"
-                                :error="!!editWindow.errors.latest_contact"
+                                :error="!!editedItem.errors.latest_contact"
                                 :error-messages="
-                                    editWindow.errors.latest_contact
+                                    editedItem.errors.latest_contact
                                 "
                             ></v-text-field>
                         </template>
                         <v-date-picker
-                            v-model="latest_contact_obj"
+                            v-model="r.latest_contact_obj"
                             v-on:update:model-value="lastContactEv"
                             :max="today"
                         ></v-date-picker>
@@ -162,8 +152,8 @@
                         rows="2"
                         auto-grow
                         :readonly="readonly"
-                        :error="!!editWindow.errors.status"
-                        :error-messages="editWindow.errors.status"
+                        :error="!!editedItem.errors.status"
+                        :error-messages="editedItem.errors.status"
                     ></v-textarea>
                     <v-textarea
                         v-model="editedItem.address"
@@ -171,16 +161,16 @@
                         rows="2"
                         auto-grow
                         :readonly="readonly"
-                        :error="!!editWindow.errors.address"
-                        :error-messages="editWindow.errors.address"
+                        :error="!!editedItem.errors.address"
+                        :error-messages="editedItem.errors.address"
                     ></v-textarea>
                     <v-text-field
                         v-model="editedItem.adfc_id"
                         label="Mitgliedsnummer"
                         type="number"
                         :readonly="readonly"
-                        :error="!!editWindow.errors.adfc_id"
-                        :error-messages="editWindow.errors.adfc_id"
+                        :error="!!editedItem.errors.adfc_id"
+                        :error-messages="editedItem.errors.adfc_id"
                     ></v-text-field>
                     <v-textarea
                         v-model="editedItem.admin_comments"
@@ -188,8 +178,8 @@
                         rows="2"
                         auto-grow
                         :readonly="readonly"
-                        :error="!!editWindow.errors.admin_comments"
-                        :error-messages="editWindow.errors.admin_comments"
+                        :error="!!editedItem.errors.admin_comments"
+                        :error-messages="editedItem.errors.admin_comments"
                     ></v-textarea>
                     <v-textarea
                         v-model="editedItem.interests"
@@ -197,8 +187,8 @@
                         rows="2"
                         auto-grow
                         :readonly="readonly"
-                        :error="!!editWindow.errors.interests"
-                        :error-messages="editWindow.errors.interests"
+                        :error="!!editedItem.errors.interests"
+                        :error-messages="editedItem.errors.interests"
                     ></v-textarea>
                     <v-menu
                         v-model="
@@ -218,16 +208,16 @@
                                 readonly
                                 v-bind="props"
                                 :error="
-                                    !!editWindow.errors
+                                    !!editedItem.errors
                                         .latest_first_aid_training
                                 "
                                 :error-messages="
-                                    editWindow.errors.latest_first_aid_training
+                                    editedItem.errors.latest_first_aid_training
                                 "
                             ></v-text-field>
                         </template>
                         <v-date-picker
-                            v-model="latest_first_aid_training_obj"
+                            v-model="r.latest_first_aid_training_obj"
                             v-on:update:model-value="lastEhkEv"
                             :max="today"
                         ></v-date-picker>
@@ -251,17 +241,17 @@
                                     readonly
                                     v-bind="props"
                                     :error="
-                                        !!editWindow.errors
+                                        !!editedItem.errors
                                             .next_first_aid_training
                                     "
                                     :error-messages="
-                                        editWindow.errors
+                                        editedItem.errors
                                             .next_first_aid_training
                                     "
                                 ></v-text-field>
                             </template>
                             <v-date-picker
-                                v-model="next_first_aid_training_obj"
+                                v-model="r.next_first_aid_training_obj"
                                 v-on:update:model-value="nextEhkEv"
                                 :min="today"
                             ></v-date-picker>
@@ -294,17 +284,17 @@
                                 readonly
                                 v-bind="props"
                                 :error="
-                                    !!editWindow.errors
+                                    !!editedItem.errors
                                         .responded_to_questionaire_at
                                 "
                                 :error-messages="
-                                    editWindow.errors
+                                    editedItem.errors
                                         .responded_to_questionaire_at
                                 "
                             ></v-text-field>
                         </template>
                         <v-date-picker
-                            v-model="responded_to_questionaire_at_obj"
+                            v-model="r.responded_to_questionaire_at_obj"
                             v-on:update:model-value="respToQuEv"
                             :max="today"
                         ></v-date-picker>
@@ -336,8 +326,8 @@
                             label="Aktiv"
                             :disabled="readonly"
                             :value-comparator="checkForTrue"
-                            :error="!!editWindow.errors.active"
-                            :error-messages="editWindow.errors.active"
+                            :error="!!editedItem.errors.active"
+                            :error-messages="editedItem.errors.active"
                         ></v-switch>
                         <v-switch
                             class="ml-5"
@@ -348,8 +338,8 @@
                             :disabled="readonly"
                             :value-comparator="checkForTrue"
                             @update:model-value="registerFirstAid"
-                            :error="!!editWindow.errors.active"
-                            :error-messages="editWindow.errors.active"
+                            :error="!!editedItem.errors.active"
+                            :error-messages="editedItem.errors.active"
                         ></v-switch>
                         <v-switch
                             class="ml-5"
@@ -358,19 +348,29 @@
                             :disabled="noAdminOrReadOnly"
                             :value-comparator="checkForTrue"
                             @update:model-value="setResponded"
-                            :error="!!editWindow.errors.active"
-                            :error-messages="editWindow.errors.active"
+                            :error="!!editedItem.errors.active"
+                            :error-messages="editedItem.errors.active"
                         ></v-switch>
                     </v-row>
                 </v-form>
                 <template v-if="editedItem.id > 0">
                     <v-data-table
                         :headers="editWindow.teamList.headers"
-                        :items="projectTeams"
+                        :items="member.project_teams"
                         :search="r.searchEditWindow"
                         @click:row="viewProjectTeamMemberItem"
                     >
                         <template v-slot:top>
+                            <!-- <AddTeamToMemberDialog /> -->
+                            <AddTeamToMemberDialog
+                                v-if="teamToMemberDialogShown"
+                                :editWindow="editWindow"
+                                :editedItem="editedItem"
+                                :memberRoles="memberRoles"
+                                :allProjectTeams="allProjectTeams"
+                                :readonly="readonly"
+                                :readonlyT="readonlyT"
+                            />
                             <!-- <AddTeamToMemberDialog
                                 :editWindow="editWindow"
                                 :editedItem="editedItem"
@@ -379,8 +379,8 @@
                                 :readonly="readonly"
                                 @closeTM="closeEditProjectTeamMemberWindow"
                                 @saveTM="saveEditProjectTeamMemberWindow"
-                            ></AddTeamToMemberDialog>
-                            <v-spacer></v-spacer> -->
+                            /> -->
+                            <v-spacer></v-spacer>
                             <v-text-field
                                 v-model="r.searchEditWindow"
                                 label="Suchen"
@@ -424,21 +424,54 @@
 </template>
 
 <script setup>
-import { computed, reactive } from "vue";
-import { usePage, router } from "@inertiajs/vue3";
-import { checkForTrue } from "@/utils";
+import { computed, onMounted, reactive } from "vue";
+import { usePage, router, useForm } from "@inertiajs/vue3";
+import { checkForTrue, fromDate } from "@/utils";
+import AddTeamToMemberDialog from "@/Components/AddTeamToMemberDialog.vue";
+import { route } from "ziggy";
 
 const props = defineProps({
     member: Object,
     readonly: Boolean,
-    projectTeams: Array,
-    // without errors, flash,user console shows warnings
+    readonlyT: Boolean,
+    teamToMemberDialogShown: Boolean,
+    teamIndex: -1,
+    allProjectTeams: Array,
+    memberRoles: Array,
+    // without errors,flash,user console shows warnings!?
     errors: Object,
     flash: Object,
     user: Object,
 });
 
-const editedItem = props.member;
+const editedItem = useForm({
+    id: props.member.id ?? -1,
+    name: "",
+    first_name: props.member.first_name ?? "",
+    last_name: props.member.last_name ?? "",
+    birthday: props.member.birthday ?? "",
+    email_adfc: props.member.email_adfc ?? "",
+    email_private: props.member.email_private ?? "",
+    phone_primary: props.member.phone_primary ?? "",
+    phone_secondary: props.member.phone_secondary ?? "",
+    address: props.member.address ?? "",
+    adfc_id: props.member.adfc_id ?? "",
+    admin_comments: props.member.admin_comments ?? "",
+    reference: props.member.reference ?? "",
+    latest_first_aid_training: props.member.latest_first_aid_training,
+    next_first_aid_training: props.member.next_first_aid_training,
+    gender: props.member.gender ?? "",
+    interests: props.member.interests ?? "",
+    latest_contact: props.member.latest_contact,
+    active: props.member.active ?? true,
+    registered_for_first_aid_training:
+        props.member.registered_for_first_aid_training ?? false,
+    responded_to_questionaire: props.member.responded_to_questionaire ?? false,
+    responded_to_questionaire_at: props.member.responded_to_questionaire_at,
+    sgvo_signature: props.member.dsgvo_signature,
+    police_certificate: props.member.police_certificate,
+    project_teams: props.member.project_teams ?? [],
+});
 
 const alert = reactive({
     shown: false,
@@ -450,6 +483,10 @@ const r = reactive({
     searchEditWindow: "",
     dbpasswd: "",
     showPwd: false,
+    latest_contact_obj: null,
+    latest_first_aid_training_obj: null,
+    next_first_aid_training_obj: null,
+    responded_to_questionaire_at_obj: null,
 });
 
 const editWindow = reactive({
@@ -480,7 +517,6 @@ const editWindow = reactive({
         ],
         editProjectTeamMemberWindow: {
             shown: false,
-            readonly: false,
             formValid: true,
             saveInProgress: false,
             errors: {},
@@ -518,6 +554,26 @@ const abgegeben = [
 ];
 
 const page = usePage();
+
+onMounted(() => {
+    console.log("1onmounted", editWindow.shown, props.teamToMemberDialogShown);
+    editWindow.shown = !!props.teamToMemberDialogShown;
+    console.log("2onmounted", editWindow.shown, props.teamIndex);
+
+    if (props.teamIndex && props.teamIndex >= 0) {
+        editWindow.teamList.editedProjectTeamMemberIndex = props.teamIndex;
+        editWindow.teamList.editProjectTeamMemberWindow.loading = true;
+
+        console.log("2aonnt", editWindow.teamList.editedProjectTeamMember);
+        Object.assign(
+            editWindow.teamList.editedProjectTeamMember,
+            props.member.project_teams[props.teamIndex]
+        );
+        console.log("2bonnt", editWindow.teamList.editedProjectTeamMember);
+        editWindow.teamList.editProjectTeamMemberWindow.shown = true;
+    }
+    console.log("3onmounted");
+});
 
 async function signUp() {
     if (r.dbpasswd == "") {
@@ -568,6 +624,10 @@ const noAdminOrReadOnly = computed(() => {
     return !isAdmin() || props.readonly;
 });
 
+const today = computed(() => {
+    return new Date().toISOString().substring(0, 10);
+});
+
 function isAdmin() {
     return !!page.props.user.is_admin;
 }
@@ -593,29 +653,116 @@ function setResponded(e) {
     }
 }
 
-function showProjectTeamMemberItem(item) {
-    editWindow.teamList.editedProjectTeamMemberIndex =
-        projectTeams.indexOf(item);
-    alerteditWindow.teamList.editProjectTeamMemberWindow.loading = true;
-
-    alerteditWindow.teamList.editedProjectTeamMember = Object.assign(
-        alertprojectTeams[
-            alerteditWindow.teamList.editedProjectTeamMemberIndex
-        ],
-        item
+function showProjectTeamMemberItem(item, readonlyT) {
+    const teamIndex = props.member.project_teams.indexOf(item);
+    router.get(
+        route("member.showWithDialog", {
+            member: props.member.id,
+            readonlyM: props.readonly,
+            readonlyT,
+            teamIndex,
+        })
     );
 
-    alerteditWindow.teamList.editProjectTeamMemberWindow.shown = true;
+    // editWindow.teamList.editedProjectTeamMemberIndex =
+    //     props.member.project_teams.indexOf(item);
+    // editWindow.teamList.editProjectTeamMemberWindow.loading = true;
+
+    // editWindow.teamList.editedProjectTeamMember = Object.assign(
+    //     props.member.project_teams[
+    //         editWindow.teamList.editedProjectTeamMemberIndex
+    //     ],
+    //     item
+    // );
+
+    // editWindow.teamList.editProjectTeamMemberWindow.shown = true;
 }
 
 function viewProjectTeamMemberItem(ev, { item }) {
-    showProjectTeamMemberItem(item);
-    editWindow.teamList.editProjectTeamMemberWindow.readonly = true;
+    showProjectTeamMemberItem(item, true);
 }
 
 function editProjectTeamMemberItem(item) {
-    showProjectTeamMemberItem(item);
-    editWindow.teamList.editProjectTeamMemberWindow.readonly = readonly;
+    showProjectTeamMemberItem(item, false);
+}
+
+function deleteProjectTeamMemberItem(item) {
+    // var index = editedItem.project_teams.indexOf(item);
+    // if (confirm("Are you sure you want to delete this item?")) {
+    //     var projectTeamMember =
+    //         editedItem.project_teams[index].project_team_member.id;
+    //     $http
+    //         .delete(
+    //             "/api/project-team-member/" +
+    //                 projectTeamMember +
+    //                 "?token=" +
+    //                 sessionStorage.getItem("token")
+    //         )
+    //         .then(function () {
+    //             var tmpEditedItem = editedItem;
+    //             tmpEditedItem.project_teams.splice(index, 1);
+    //             editedItem = Object.assign({}, tmpEditedItem);
+    //             showAlert("success", "Gelöscht");
+    //         })
+    //         .catch(function (error) {
+    //             handleRequestError(error);
+    //         });
+    // }
+}
+
+function saveEditProjectTeamMemberWindow() {
+    console.log("saveEditProjectTeamMemberWindow");
+
+    // var tm = editWindow.teamList.editedProjectTeamMember;
+    // var tmx = editWindow.teamList.editedProjectTeamMemberIndex;
+    // editWindow.teamList.editProjectTeamMemberWindow.saveInProgress = true;
+    // if (tmx > -1) {
+    //     var projectTeamMemberId = tm.project_team_member.id;
+    //     $http
+    //         .put(
+    //             "/api/project-team-member/" +
+    //                 projectTeamMemberId +
+    //                 "?token=" +
+    //                 sessionStorage.getItem("token"),
+    //             tm.project_team_member
+    //         )
+    //         .then(function (response) {
+    //             Object.assign(
+    //                 projectTeams[tmx].project_team_member,
+    //                 response.data
+    //             );
+    //             closeEditProjectTeamMemberWindow();
+    //         })
+    //         .catch(function (error) {
+    //             handleRequestError(
+    //                 error,
+    //                 editWindow.teamList.editProjectTeamMemberWindow
+    //             );
+    //         });
+    // } else {
+    //     tm.project_team_member.member_id = editedItem.id;
+    //     $http
+    //         .post(
+    //             "/api/project-team-member?token=" +
+    //                 sessionStorage.getItem("token"),
+    //             tm.project_team_member
+    //         )
+    //         .then(function (response) {
+    //             var projectTeamNewId = response.data.project_team_id;
+    //             var projectTeamNew = allProjectTeams.find(
+    //                 (projectTeam) => projectTeam.id === projectTeamNewId
+    //             );
+    //             projectTeamNew.project_team_member = response.data;
+    //             projectTeams.push(projectTeamNew);
+    //             closeEditProjectTeamMemberWindow();
+    //         })
+    //         .catch(function (error) {
+    //             handleRequestError(
+    //                 error,
+    //                 editWindow.teamList.editProjectTeamMemberWindow
+    //             );
+    //         });
+    // }
 }
 
 function closeEW() {
@@ -628,7 +775,17 @@ function closeEW() {
     );
 }
 function saveEW() {
-    console.log("saveEW");
+    editedItem.last_name = editedItem.last_name.trim();
+    editedItem.first_name = editedItem.first_name.trim();
+    editedItem.name = editedItem.last_name + ", " + editedItem.first_name;
+    console.log("editedItem", JSON.stringify(editedItem));
+    if (editedItem.id == -1) {
+        // router.post(route("member.store", editedItem));
+        editedItem.post(route("member.store"));
+    } else {
+        // router.put(route("member.update", editedItem));
+        editedItem.put(route("member.update"), { member: editedItem.id });
+    }
 }
 
 function showAlert(type, text) {
@@ -640,5 +797,33 @@ function showAlert(type, text) {
         alert.shown = false;
         r.loading = false;
     }, 5000);
+}
+
+function closeEditProjectTeamMemberWindow() {
+    console.log("closeEditProjectTeamMemberWindow");
+    editWindow.shown = false;
+}
+
+function lastContactEv() {
+    editWindow.showLatestContactDatePicker = false;
+    editedItem.latest_contact = fromDate(r.latest_contact_obj);
+}
+function lastEhkEv() {
+    editWindow.showLatestFirstAidTrainingDatePicker = false;
+    editedItem.latest_first_aid_training = fromDate(
+        r.latest_first_aid_training_obj
+    );
+}
+function nextEhkEv() {
+    editWindow.showNextFirstAidTrainingDatePicker = false;
+    editedItem.next_first_aid_training = fromDate(
+        r.next_first_aid_training_obj
+    );
+}
+function respToQuEv() {
+    editWindow.showQuestResponseDatePicker = false;
+    editedItem.responded_to_questionaire_at = fromDate(
+        r.responded_to_questionaire_at_obj
+    );
 }
 </script>

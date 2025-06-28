@@ -49,9 +49,22 @@
                 />
                 <v-spacer></v-spacer> -->
                 <v-row class="ml-2">
-                    <v-switch v-model="r.activeSwitch" label="Nur Aktive">
+                    <v-btn
+                        color="primary"
+                        variant="outlined"
+                        class="my-2 mr-4"
+                        v-bind="props"
+                        v-if="isAdmin()"
+                        @click.prevent="addMember"
+                    >
+                        <v-icon start>mdi-plus</v-icon> Mitglied Hinzufügen
+                    </v-btn>
+                    <v-switch
+                        v-model="r.activeSwitch"
+                        label="Nur Aktive"
+                        class="mr-4"
+                    >
                     </v-switch>
-                    &nbsp;&nbsp;&nbsp;
                     <v-switch
                         v-if="!isAdmin()"
                         v-model="r.agSwitch"
@@ -117,8 +130,8 @@
                                 variant="outlined"
                                 @click.prevent="exportExcel"
                             >
-                                <v-icon start>mdi-file-excel</v-icon> Jetzt
-                                exportieren
+                                <v-icon start>mdi-file-excel</v-icon>
+                                Jetzt exportieren
                             </v-btn>
                         </v-row>
                     </v-container>
@@ -220,7 +233,8 @@
 <script setup>
 import { toAbgegeben, checkForTrue, makeSchema } from "@/utils";
 import { reactive } from "vue";
-import { router, usePage, useForm } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
+import { route } from "ziggy";
 import writeXlsxFile from "write-excel-file";
 
 const props = defineProps({ members: Array });
@@ -340,7 +354,7 @@ function isAdmin() {
 }
 
 function mayReadHistory() {
-    return !!page.props.user.is_admin; // TODO
+    return page.props.user.may_read_history;
 }
 
 function showItem(item, readonly) {
@@ -353,6 +367,10 @@ function viewItem(ev, { item }) {
 }
 function editItem(item) {
     showItem(item, false);
+}
+
+function addMember() {
+    router.get(route("member.create"));
 }
 
 async function exportExcel() {
@@ -374,7 +392,7 @@ async function exportExcel() {
         for (let m of props.members) {
             if (!m.with_details) continue;
             try {
-                m.ags = await getMemberFromApi(m.id);
+                m.ags = await getMemberTeamsFromApi(m.id);
                 m.agAll = m.ags.join(",");
                 myMembers.push(m);
                 if (myMembers.length >= 10) break;
@@ -414,7 +432,7 @@ function showAlert(type, text) {
     }, 5000);
 }
 
-async function getMemberFromApi(id) {
+async function getMemberTeamsFromApi(id) {
     const resp = await fetch("/member/" + id + "/teams");
     const res = await resp.json();
     console.log("res", res);

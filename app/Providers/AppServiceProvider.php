@@ -79,7 +79,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('see-project-team-details', function (User $user, int $project_team_id) {
             $project_team = ProjectTeam::find($project_team_id);
 
-            return ($user->isAdmin() || $user->has_ability('leserechte', $project_team));
+            return ($user->isAdmin || $user->has_ability('leserechte', $project_team));
         });
 
         Gate::define('edit-member-details', function (User $user, int $member_id) {

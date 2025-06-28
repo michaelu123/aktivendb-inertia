@@ -15,5 +15,6 @@ Route::delete("login", [AuthController::class, 'create']);
 Route::get('logout', [AuthController::class, 'destroy'])->name("logout");
 
 Route::resource('member', MemberController::class)
-    ->only(['index', 'show']);
+    ->only(['index', 'show', 'create', 'store', 'update']);
 Route::get('member/{id}/teams', [MemberController::class, 'teams'])->middleware("auth")->name("teams");
+Route::get('member/{member}/withdialog', [MemberController::class, 'showWithDialog'])->middleware("auth")->name("member.showWithDialog");
