@@ -353,6 +353,17 @@
                         ></v-switch>
                     </v-row>
                 </v-form>
+                <v-btn
+                    color="primary"
+                    variant="outlined"
+                    class="mb-2"
+                    v-bind="props"
+                    v-if="!readonly"
+                    @click.prevent="addTeamToMember"
+                >
+                    <v-icon start>mdi-plus</v-icon> Mitglied zu AG Hinzufügen
+                </v-btn>
+
                 <template v-if="editedItem.id > 0">
                     <v-data-table
                         :headers="editWindow.teamList.headers"
@@ -446,7 +457,7 @@ const props = defineProps({
 
 const editedItem = useForm({
     id: props.member.id ?? -1,
-    name: "",
+    name: props.member.name ?? "",
     first_name: props.member.first_name ?? "",
     last_name: props.member.last_name ?? "",
     birthday: props.member.birthday ?? "",
@@ -526,7 +537,7 @@ const editWindow = reactive({
             project_team_member: {
                 admin_comments: "",
                 id: -1,
-                member_id: -1,
+                member_id: props.member.id,
                 member_role_id: -1,
                 member_role_title: "",
                 project_team_id: -1,
@@ -537,7 +548,7 @@ const editWindow = reactive({
             project_team_member: {
                 admin_comments: "",
                 id: -1,
-                member_id: -1,
+                member_id: props.member.id,
                 member_role_id: -1,
                 member_role_title: "",
                 project_team_id: -1,
@@ -556,23 +567,59 @@ const abgegeben = [
 const page = usePage();
 
 onMounted(() => {
-    console.log("1onmounted", editWindow.shown, props.teamToMemberDialogShown);
     editWindow.shown = !!props.teamToMemberDialogShown;
-    console.log("2onmounted", editWindow.shown, props.teamIndex);
+    editWindow.teamList.editedProjectTeamMemberIndex = props.teamIndex;
 
     if (props.teamIndex && props.teamIndex >= 0) {
-        editWindow.teamList.editedProjectTeamMemberIndex = props.teamIndex;
-        editWindow.teamList.editProjectTeamMemberWindow.loading = true;
-
-        console.log("2aonnt", editWindow.teamList.editedProjectTeamMember);
         Object.assign(
             editWindow.teamList.editedProjectTeamMember,
             props.member.project_teams[props.teamIndex]
         );
-        console.log("2bonnt", editWindow.teamList.editedProjectTeamMember);
         editWindow.teamList.editProjectTeamMemberWindow.shown = true;
+    } else {
+        editWindow.teamList.editedProjectTeamMember = {
+            project_team_member: {
+                id: -1,
+                member_id: props.member.id,
+                project_team_id: -1,
+                member_role_id: -1,
+                admin_comments: "",
+                member_role_title: "",
+                member_role: {
+                    id: -1,
+                    title: "",
+                    description: "",
+                    reference: "",
+                },
+            },
+            name: "",
+            id: -1,
+            email: "",
+            description: "",
+            comments: "",
+            reference: "",
+        };
+        if (
+            props.allProjectTeams &&
+            props.allProjectTeams[props.allProjectTeams.length - 1].id != -1
+        ) {
+            props.allProjectTeams.push({
+                name: "bitte wählen",
+                id: -1,
+                props: { disabled: true },
+            });
+        }
+        if (
+            props.memberRoles &&
+            props.memberRoles[props.memberRoles.length - 1].id != -1
+        ) {
+            props.memberRoles.push({
+                title: "bitte wählen",
+                id: -1,
+                props: { disabled: true },
+            });
+        }
     }
-    console.log("3onmounted");
 });
 
 async function signUp() {
@@ -684,6 +731,10 @@ function viewProjectTeamMemberItem(ev, { item }) {
 
 function editProjectTeamMemberItem(item) {
     showProjectTeamMemberItem(item, false);
+}
+
+function addTeamToMember() {
+    showProjectTeamMemberItem({}, false);
 }
 
 function deleteProjectTeamMemberItem(item) {

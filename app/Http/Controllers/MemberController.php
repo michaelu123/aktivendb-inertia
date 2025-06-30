@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Models\MemberRole;
 use App\Models\ProjectTeam;
+use App\Models\ProjectTeamMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -114,7 +115,7 @@ class MemberController extends Controller
         $readonlyT = !!$request->query("readonlyT", true);
         $teamIndex = $request->query("teamIndex");
         $member->load(["project_teams"]);
-        $allProjectTeams = ProjectTeam::all()->map(fn($t) => ["name" => $t->name, "id" => $t->id]);
+        $allProjectTeams = ProjectTeam::orderBy("name")->get()->map(fn($t) => ["name" => $t->name, "id" => $t->id]);
         $memberRoles = MemberRole::all()->map(fn($r) => ["title" => $r->title, "id" => $r->id]);
         foreach ($member->project_teams as $project_team) {
             $project_team->project_team_member->member_role_title = $project_team->project_team_member->member_role->title;
@@ -175,5 +176,32 @@ class MemberController extends Controller
     public function destroy(Member $member)
     {
         //
+    }
+
+    public function updateTM(Request $request)
+    {
+        $v = $request->validate([
+            "id" => "required",
+            "member_role_id" => "required|min:1|max:3",
+            "admin_comments" => "nullable",
+            "member_id" => "required",
+        ]);
+        $tmid = $v["id"];
+        $tm = ProjectTeamMember::find($tmid);
+        $r = $tm->update($v);
+        $member = Member::find($v["member_id"]);
+        return $this->show($member, $request);
+    }
+    public function storeTM(Request $request)
+    {
+        $v = $request->validate([
+            "project_team_id" => "required",
+            "member_id" => "required",
+            "member_role_id" => "required|min:1|max:3",
+            "admin_comments" => "nullable",
+        ]);
+        ProjectTeamMember::create($v);
+        $member = Member::find($v["member_id"]);
+        return $this->show($member, $request);
     }
 }

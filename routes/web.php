@@ -14,6 +14,8 @@ Route::put('login/chgpwd', [AuthController::class, 'update'])->name("login.chgpw
 Route::delete("login", [AuthController::class, 'create']);
 Route::get('logout', [AuthController::class, 'destroy'])->name("logout");
 
+Route::post('member/storetm', [MemberController::class, 'storeTM'])->middleware("auth")->name("member.storetm");
+Route::put('member/updatetm', [MemberController::class, 'updateTM'])->middleware("auth")->name("member.updatetm");
 Route::resource('member', MemberController::class)
     ->only(['index', 'show', 'create', 'store', 'update']);
 Route::get('member/{id}/teams', [MemberController::class, 'teams'])->middleware("auth")->name("teams");
