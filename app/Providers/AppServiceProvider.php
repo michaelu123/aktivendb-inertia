@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Listeners\HistoryListener;
 use App\Models\Member;
 use App\Models\ProjectTeam;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::subscribe(HistoryListener::class);
+
         Gate::define('administer-users', function (User $user) {
             return $user->isAdmin;
         });
@@ -117,15 +121,3 @@ class AppServiceProvider extends ServiceProvider
         // });
     }
 }
-
-/*
-
-
-
-select amr.member_role_id 
-from ability_member_role amr, abilities a 
-where amr.ability_id = a.id 
-    and a.reference = \'leserechte\' 
-    and amr.deleted_at is null and a.deleted_at is null
-
-*/

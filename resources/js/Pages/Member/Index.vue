@@ -361,12 +361,20 @@ function showItem(item, readonly) {
     router.get(route("member.show", { member: item.id, readonly }));
     console.log("showItem", readonly);
 }
+
 function viewItem(ev, { item }) {
     console.log("viewitem", item);
     showItem(item, true);
 }
+
 function editItem(item) {
     showItem(item, false);
+}
+
+function deleteItem(item) {
+    if (confirm("Mitglied wirklich löschen?")) {
+        router.delete(route("member.destroy", { member: item.id }));
+    }
 }
 
 function addMember() {

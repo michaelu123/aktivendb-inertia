@@ -49,7 +49,8 @@ class HandleInertiaRequests extends Middleware
                 "is_admin" => $user->isAdmin,
                 "may_read_history" => $user->mayReadHistory,
                 //                "notificationCount" => $user->unreadNotifications()->count(),
-            ] : null
+            ] : null,
+            "store" => $sess->get("store", []),
         ];
         return $res;
     }

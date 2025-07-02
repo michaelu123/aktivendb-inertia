@@ -380,7 +380,6 @@
                                 :memberRoles="memberRoles"
                                 :allProjectTeams="allProjectTeams"
                                 :readonly="readonly"
-                                :readonlyT="readonlyT"
                             />
                             <!-- <AddTeamToMemberDialog
                                 :editWindow="editWindow"
@@ -443,17 +442,18 @@ import { route } from "ziggy";
 
 const props = defineProps({
     member: Object,
-    readonly: Boolean,
-    readonlyT: Boolean,
     teamToMemberDialogShown: Boolean,
     teamIndex: -1,
     allProjectTeams: Array,
     memberRoles: Array,
+    store: Object,
     // without errors,flash,user console shows warnings!?
     errors: Object,
     flash: Object,
     user: Object,
 });
+
+let readonly = computed(() => props.store.readonly1);
 
 const editedItem = useForm({
     id: props.member.id ?? -1,
@@ -700,13 +700,12 @@ function setResponded(e) {
     }
 }
 
-function showProjectTeamMemberItem(item, readonlyT) {
+function showProjectTeamMemberItem(item, readonly) {
     const teamIndex = props.member.project_teams.indexOf(item);
     router.get(
         route("member.showWithDialog", {
             member: props.member.id,
-            readonlyM: props.readonly,
-            readonlyT,
+            readonly,
             teamIndex,
         })
     );

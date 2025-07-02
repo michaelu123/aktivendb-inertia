@@ -13,35 +13,6 @@ use Illuminate\Validation\ValidationException;
 
 class MemberController extends Controller
 {
-    private function customValidator(Request $request, $id = null)
-    {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                "first_name" => "required",
-                "last_name" => "required",
-                "birthday" => "date|nullable",
-                'email_adfc' => 'email|nullable',
-                'email_private' => 'email|nullable'
-            ],
-            array(
-                'required' => ':attribute muss befüllt werden.',
-                'email' => ':attribute muss eine E-Mail sein',
-                'unique' => ':attribute muss einzigartig sein'
-            ),
-            array(
-                'email_adfc' => 'E-Mail (ADFC)',
-                'email_private' => 'E-Mail (Privat)',
-                'adfc_id' => 'Mitgliedsnummer',
-                'first_name' => 'Vorname',
-                'last_name' => 'Nachname',
-                'birtday' => 'Geburtsjahr',
-            )
-        );
-
-        return $validator;
-    }
-
     /**
      * Display a listing of the resource.
      */
@@ -64,7 +35,7 @@ class MemberController extends Controller
         $member->id = -1;
         return inertia(
             'Member/Show',
-            ["member" => $member, "readonly" => false]
+            ["member" => $member]
         );
     }
 
@@ -74,12 +45,6 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $all = $request->all();
-        // $validator = $this->customValidator($request);
-        // $fail = $validator->fails();
-        // if (!$fail) {
-        //     //            $all = $request->all();
-        //     Member::create($all);
-        // }
         $v = $request->validate(
             [
                 "first_name" => "required",
@@ -98,21 +63,30 @@ class MemberController extends Controller
      */
     public function show(Member $member, Request $request)
     {
-        $readonly = !!$request->query("readonly", true);
+        $sess = $request->session();
+        $readonly = $request->query("readonly", null);
+        $store = $sess->get("store", []);
+        if ($readonly !== null) {
+            $store["readonly1"] = !!$readonly;
+            $sess->put("store", $store);
+        }
         $member->load(["project_teams"]);
         foreach ($member->project_teams as $project_team) {
             $project_team->project_team_member->member_role_title = $project_team->project_team_member->member_role->title;
         }
         return inertia(
             'Member/Show',
-            ["member" => $member, "readonly" => $readonly]
+            ["member" => $member, "store" => $store]
         );
     }
 
     public function showWithDialog(Member $member, Request $request)
     {
-        $readonlyM = !!$request->query("readonlyM", true);
-        $readonlyT = !!$request->query("readonlyT", true);
+        $sess = $request->session();
+        $readonly = !!$request->query("readonly", true);
+        $store = $sess->get("store", []);
+        $store["readonly2"] = $readonly;
+        $sess->put("store", $store);
         $teamIndex = $request->query("teamIndex");
         $member->load(["project_teams"]);
         $allProjectTeams = ProjectTeam::orderBy("name")->get()->map(fn($t) => ["name" => $t->name, "id" => $t->id]);
@@ -124,12 +98,11 @@ class MemberController extends Controller
             'Member/Show',
             [
                 "member" => $member,
-                "readonly" => $readonlyM,
-                "readonlyT" => $readonlyT,
                 "teamToMemberDialogShown" => true,
                 "teamIndex" => $teamIndex,
                 "allProjectTeams" => $allProjectTeams,
                 "memberRoles" => $memberRoles,
+                "store" => $store,
             ]
         );
     }
@@ -173,9 +146,15 @@ class MemberController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Member $member)
+    public function destroy(Member $member, Request $request)
     {
-        //
+        $user = $request->user();
+        if ($user->isAdmin) {
+            $member->delete();
+            return redirect()->back()->with('success', "Mitglied wurde gelöscht");
+        } else {
+            abort(403);
+        }
     }
 
     public function updateTM(Request $request)

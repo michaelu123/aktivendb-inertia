@@ -22,7 +22,7 @@
                             label="Rolle"
                             required
                             :rules="[(v) => v != -1 || 'Bitte Rolle wählen']"
-                            :readonly="readonlyT"
+                            :readonly="readonly"
                             :error="!!mtForm.member_role_id"
                             :error-messages="mtForm.errors.member_role_id"
                         ></v-select>
@@ -43,7 +43,7 @@
                             :rules="[
                                 (v) => v != -1 || 'Bitte AG/Gruppe wählen',
                             ]"
-                            :readonly="readonlyT"
+                            :readonly="readonly"
                             :error="
                                 !!editWindow.teamList
                                     .editProjectTeamMemberWindow.errors
@@ -64,7 +64,7 @@
                             label="Kommentar"
                             rows="3"
                             auto-grow
-                            :readonly="readonlyT"
+                            :readonly="readonly"
                             :error="
                                 !!editWindow.teamList
                                     .editProjectTeamMemberWindow.errors
@@ -86,7 +86,7 @@
                         editWindow.teamList.editProjectTeamMemberWindow
                             .saveInProgress
                     "
-                    v-if="!readonlyT"
+                    v-if="!readonly"
                     :disabled="invalidForm"
                     >Speichern</v-btn
                 >
@@ -97,7 +97,7 @@
 
 <script setup>
 import { computed, watch } from "vue";
-import { router, useForm } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 
 const props = defineProps([
@@ -105,9 +105,10 @@ const props = defineProps([
     "editedItem",
     "memberRoles",
     "allProjectTeams",
-    "readonly",
-    "readonlyT",
+    "store",
 ]);
+const page = usePage();
+const readonly = computed(() => page.props.store.readonly2);
 
 const mtForm = useForm({
     id: -1,
@@ -142,17 +143,9 @@ const invalidForm = computed(
 function saveTM() {
     console.log("saveTM", mtForm);
     if (mtForm.id == -1) {
-        mtForm.post(
-            route("member.storetm", {
-                readonly: props.readonly,
-            })
-        );
+        mtForm.post(route("member.storetm"));
     } else {
-        mtForm.put(
-            route("member.updatetm", {
-                readonly: props.readonly,
-            })
-        );
+        mtForm.put(route("member.updatetm"));
     }
 }
 
@@ -161,7 +154,7 @@ function closeTM() {
     router.get(
         route("member.show", {
             member: props.editedItem.id,
-            readonly: props.readonly,
+            //            readonly: page.props.store.readonly1,
         })
     );
 }

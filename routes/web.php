@@ -17,6 +17,6 @@ Route::get('logout', [AuthController::class, 'destroy'])->name("logout");
 Route::post('member/storetm', [MemberController::class, 'storeTM'])->middleware("auth")->name("member.storetm");
 Route::put('member/updatetm', [MemberController::class, 'updateTM'])->middleware("auth")->name("member.updatetm");
 Route::resource('member', MemberController::class)
-    ->only(['index', 'show', 'create', 'store', 'update']);
+    ->only(['index', 'show', 'create', 'store', 'update', 'destroy']);
 Route::get('member/{id}/teams', [MemberController::class, 'teams'])->middleware("auth")->name("teams");
 Route::get('member/{member}/withdialog', [MemberController::class, 'showWithDialog'])->middleware("auth")->name("member.showWithDialog");
