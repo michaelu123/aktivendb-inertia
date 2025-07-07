@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
         $sess = $request->session();
+        $store = $sess->get("store", []);
         $res = [
             ...parent::share($request),
             'flash' => [
@@ -48,9 +49,8 @@ class HandleInertiaRequests extends Middleware
                 "email" => $user->email,
                 "is_admin" => $user->isAdmin,
                 "may_read_history" => $user->mayReadHistory,
-                //                "notificationCount" => $user->unreadNotifications()->count(),
             ] : null,
-            "store" => $sess->get("store", []),
+            "storeS" => $store,
         ];
         return $res;
     }

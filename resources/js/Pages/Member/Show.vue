@@ -67,7 +67,7 @@
                         :error-messages="editedItem.errors.first_name"
                     ></v-text-field>
                     <v-text-field
-                        v-model="editedItem.birthday"
+                        v-model.number="editedItem.birthday"
                         label="Geburtsjahr"
                         required
                         :readonly="readonly"
@@ -358,7 +358,7 @@
                     variant="outlined"
                     class="mb-2"
                     v-bind="props"
-                    v-if="!readonly"
+                    v-if="!readonly && editedItem.id > 0"
                     @click.prevent="addTeamToMember"
                 >
                     <v-icon start>mdi-plus</v-icon> Mitglied zu AG Hinzufügen
@@ -446,21 +446,22 @@ const props = defineProps({
     teamIndex: -1,
     allProjectTeams: Array,
     memberRoles: Array,
-    store: Object,
+    storeC: Object,
+    storeS: Object,
     // without errors,flash,user console shows warnings!?
     errors: Object,
     flash: Object,
     user: Object,
 });
 
-let readonly = computed(() => props.store.readonly1);
+let readonly = computed(() => props.storeC.readonly1);
 
 const editedItem = useForm({
     id: props.member.id ?? -1,
     name: props.member.name ?? "",
     first_name: props.member.first_name ?? "",
     last_name: props.member.last_name ?? "",
-    birthday: props.member.birthday ?? "",
+    birthday: props.member.birthday,
     email_adfc: props.member.email_adfc ?? "",
     email_private: props.member.email_private ?? "",
     phone_primary: props.member.phone_primary ?? "",
@@ -817,12 +818,7 @@ function saveEditProjectTeamMemberWindow() {
 
 function closeEW() {
     console.log("closeEW");
-    router.get(
-        route("member.index", {
-            preserveState: true,
-            preserveScroll: true,
-        })
-    );
+    router.get(route("member.index"));
 }
 function saveEW() {
     editedItem.last_name = editedItem.last_name.trim();

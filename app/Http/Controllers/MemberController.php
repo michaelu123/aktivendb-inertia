@@ -16,12 +16,22 @@ class MemberController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $sess = $request->session();
+
+        $store = $sess->get("store", []);
+        $pageno = $request->query("pageno", null);
+        if ($pageno !== null) {
+            $store["pageno"] = $pageno;
+        }
+        $sess->put("store", $store);
+
         return inertia(
             'Member/Index',
             [
-                "members" => Member::orderBy("last_name")->get()
+                "members" => Member::orderBy("last_name")->get(),
+                "storeC" => $store
             ]
         );
     }
@@ -49,13 +59,14 @@ class MemberController extends Controller
             [
                 "first_name" => "required",
                 "last_name" => "required",
-                "birthday" => "decimal:4|nullable",
+                "birthday" => "digits:4|nullable",
                 'email_adfc' => 'email|nullable',
-                'email_private' => 'email|nullable'
-
+                'email_private' => 'email|nullable',
+                'adfc_id' => "digits:8|nullable"
             ]
         );
         Member::create($all);
+        return redirect()->back()->with('success', "Neuer Mitgliedseintrag wurde erzeugt");
     }
 
     /**
@@ -64,29 +75,40 @@ class MemberController extends Controller
     public function show(Member $member, Request $request)
     {
         $sess = $request->session();
-        $readonly = $request->query("readonly", null);
+
         $store = $sess->get("store", []);
+        $readonly = $request->query("readonly", null);
         if ($readonly !== null) {
             $store["readonly1"] = !!$readonly;
-            $sess->put("store", $store);
         }
+        $pageno = $request->query("pageno", null);
+        if ($pageno !== null) {
+            $store["pageno"] = $pageno;
+        }
+        $sess->put("store", $store);
+
         $member->load(["project_teams"]);
         foreach ($member->project_teams as $project_team) {
             $project_team->project_team_member->member_role_title = $project_team->project_team_member->member_role->title;
         }
         return inertia(
             'Member/Show',
-            ["member" => $member, "store" => $store]
+            [
+                "member" => $member,
+                "storeC" => $store
+            ]
         );
     }
 
     public function showWithDialog(Member $member, Request $request)
     {
         $sess = $request->session();
-        $readonly = !!$request->query("readonly", true);
+
         $store = $sess->get("store", []);
+        $readonly = !!$request->query("readonly", true);
         $store["readonly2"] = $readonly;
         $sess->put("store", $store);
+
         $teamIndex = $request->query("teamIndex");
         $member->load(["project_teams"]);
         $allProjectTeams = ProjectTeam::orderBy("name")->get()->map(fn($t) => ["name" => $t->name, "id" => $t->id]);
@@ -102,13 +124,14 @@ class MemberController extends Controller
                 "teamIndex" => $teamIndex,
                 "allProjectTeams" => $allProjectTeams,
                 "memberRoles" => $memberRoles,
-                "store" => $store,
+                "storeC" => $store
             ]
         );
     }
 
     public function teams(Request $request, int $member_id)
     {
+        // this function is only called via fetch from exportExcel (like an api function)
         if (!Gate::allows('see-member-details', $member_id)) {
             return [];
         }
@@ -141,6 +164,7 @@ class MemberController extends Controller
 
         ]);
         $member->update($v);
+        return redirect()->back()->with('success', "Mitgliedseintrag wurde geändert");
     }
 
     /**
@@ -151,7 +175,7 @@ class MemberController extends Controller
         $user = $request->user();
         if ($user->isAdmin) {
             $member->delete();
-            return redirect()->back()->with('success', "Mitglied wurde gelöscht");
+            return redirect()->back()->with('success', "Mitgliedseintrag wurde gelöscht");
         } else {
             abort(403);
         }

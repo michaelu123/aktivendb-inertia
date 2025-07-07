@@ -23,6 +23,7 @@
             :search="r.search"
             :loading="r.loading"
             loading-text="Wird geladen..."
+            v-model:page="r.pageno"
             @click:row="viewItem"
         >
             <template v-slot:top>
@@ -237,7 +238,7 @@ import { router, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 import writeXlsxFile from "write-excel-file";
 
-const props = defineProps({ members: Array });
+const props = defineProps({ members: Array, storeC: Object, storeS: Object });
 
 const headers = [
     {
@@ -339,6 +340,7 @@ const r = reactive({
     excelFileName: "",
     preferredEmail: "Bevorzugte Email-Adresse",
     loadingTeams: false,
+    pageno: props.storeC.pageno ?? 1,
 });
 
 const alert = reactive({
@@ -358,7 +360,9 @@ function mayReadHistory() {
 }
 
 function showItem(item, readonly) {
-    router.get(route("member.show", { member: item.id, readonly }));
+    router.get(
+        route("member.show", { member: item.id, readonly, pageno: r.pageno })
+    );
     console.log("showItem", readonly);
 }
 
@@ -373,7 +377,7 @@ function editItem(item) {
 
 function deleteItem(item) {
     if (confirm("Mitglied wirklich löschen?")) {
-        router.delete(route("member.destroy", { member: item.id }));
+        router.delete(route("member.destroy", { member: item.id, readonly }));
     }
 }
 

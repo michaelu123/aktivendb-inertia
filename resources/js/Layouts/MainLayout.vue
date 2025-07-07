@@ -5,10 +5,10 @@
         <Navigation />
     </header>
 
-    <main class="container w-full p-4 mx-auto">
+    <main class="">
         <div
             v-if="flashSuccess"
-            class="p-2 mb-4 border border-green-200 rounded-md shadow-sm dark:border-green-800 bg-green-50 dark:bg-green-900"
+            class="flex items-center justify-center h-10 mt-4 bg-green-200 border border-green-200 rounded-md shadow-sm dark:border-green-50 dark:bg-green-900"
         >
             {{ flashSuccess }}
         </div>

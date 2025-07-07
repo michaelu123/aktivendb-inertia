@@ -108,7 +108,7 @@ const props = defineProps([
     "store",
 ]);
 const page = usePage();
-const readonly = computed(() => page.props.store.readonly2);
+const readonly = computed(() => page.props.storeC.readonly2);
 
 const mtForm = useForm({
     id: -1,
@@ -154,7 +154,6 @@ function closeTM() {
     router.get(
         route("member.show", {
             member: props.editedItem.id,
-            //            readonly: page.props.store.readonly1,
         })
     );
 }

@@ -9,7 +9,7 @@
             <v-btn variant="text" :to="route('home')"> Home </v-btn>
             <v-btn
                 variant="text"
-                :to="route('member.index')"
+                :to="route('member.index', { pageno: 1 })"
                 v-if="is_logged_in"
             >
                 Aktive
