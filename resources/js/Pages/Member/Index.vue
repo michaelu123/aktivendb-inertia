@@ -27,28 +27,6 @@
             @click:row="viewItem"
         >
             <template v-slot:top>
-                <!-- <AddMemberToMembersDialog
-                    :editWindow="editWindow"
-                    :editedItem="editedItem"
-                    :memberRoles="memberRoles"
-                    :projectTeams="projectTeams"
-                    :allProjectTeams="allProjectTeams"
-                    :strictReadonly="strictReadonly"
-                    :checkForTrue="checkForTrue"
-                    :closeEditProjectTeamMemberWindow="
-                        closeEditProjectTeamMemberWindow
-                    "
-                    :handleRequestError="handleRequestError"
-                    @closeEW="closeEditWindow"
-                    @saveEW="saveEditWindow"
-                ></AddMemberToMembersDialog>
-                <HistoryDialog
-                    v-if="mayReadHistory() && history.shown"
-                    :projectTeams="allProjectTeams"
-                    :members="members"
-                    :history="history"
-                />
-                <v-spacer></v-spacer> -->
                 <v-row class="ml-2">
                     <v-btn
                         color="primary"
@@ -377,7 +355,7 @@ function editItem(item) {
 
 function deleteItem(item) {
     if (confirm("Mitglied wirklich löschen?")) {
-        router.delete(route("member.destroy", { member: item.id, readonly }));
+        router.delete(route("member.destroy", { member: item.id }));
     }
 }
 
@@ -407,7 +385,6 @@ async function exportExcel() {
                 m.ags = await getMemberTeamsFromApi(m.id);
                 m.agAll = m.ags.join(",");
                 myMembers.push(m);
-                if (myMembers.length >= 10) break;
             } catch (ex) {
                 console.log("ex!!", ex);
             }

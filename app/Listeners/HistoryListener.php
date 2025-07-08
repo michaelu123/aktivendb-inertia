@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\MemberUpdated;
-use App\Events\ProjectTeamMemberUpdated;
-use App\Events\ProjectTeamUpdated;
+use App\Events\TeamMemberUpdated;
+use App\Events\TeamUpdated;
 use App\Traits\TracksHistoryTrait;
 
 class HistoryListener
@@ -35,23 +35,23 @@ class HistoryListener
   /**
    * Handle the event.
    *
-   * @param  ProjectTeamUpdated  $event
+   * @param  TeamUpdated  $event
    * @return void
    */
-  public function onProjectTeamUpdate(ProjectTeamUpdated $event)
+  public function onTeamUpdate(TeamUpdated $event)
   {
-    $this->track($event->project_team);
+    $this->track($event->team);
   }
 
   /**
    * Handle the event.
    *
-   * @param  ProjectTeamMemberUpdated  $event
+   * @param  TeamMemberUpdated  $event
    * @return void
    */
-  public function onProjectTeamMemberUpdate(ProjectTeamMemberUpdated $event)
+  public function onTeamMemberUpdate(TeamMemberUpdated $event)
   {
-    $this->track($event->project_team_member);
+    $this->track($event->team_member);
   }
 
   /**
@@ -68,13 +68,13 @@ class HistoryListener
     );
 
     $events->listen(
-      'App\Events\ProjectTeamUpdated',
-      'App\Listeners\HistoryListener@onProjectTeamUpdate'
+      'App\Events\TeamUpdated',
+      'App\Listeners\HistoryListener@onTeamUpdate'
     );
 
     $events->listen(
-      'App\Events\ProjectTeamMemberUpdated',
-      'App\Listeners\HistoryListener@onProjectTeamMemberUpdate'
+      'App\Events\TeamMemberUpdated',
+      'App\Listeners\HistoryListener@onTeamMemberUpdate'
     );
     return [];
   }

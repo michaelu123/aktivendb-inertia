@@ -7,11 +7,8 @@ use App\Models\MemberRole;
 use App\Models\Team;
 use App\Models\TeamMember;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
-class MemberController extends Controller
+class TeamController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -28,9 +25,9 @@ class MemberController extends Controller
         $sess->put("store", $store);
 
         return inertia(
-            'Member/Index',
+            'Team/Index',
             [
-                "members" => Member::orderBy("last_name")->get(),
+                "teams" => Team::orderBy("name")->get(),
                 "storeC" => $store
             ]
         );
@@ -41,11 +38,11 @@ class MemberController extends Controller
      */
     public function create()
     {
-        $member = new Member;
-        $member->id = -1;
+        $team = new Team;
+        $team->id = -1;
         return inertia(
-            'Member/Show',
-            ["member" => $member]
+            'Team/Show',
+            ["team" => $team]
         );
     }
 
@@ -57,22 +54,18 @@ class MemberController extends Controller
         $all = $request->all();
         $v = $request->validate(
             [
-                "first_name" => "required",
-                "last_name" => "required",
-                "birthday" => "digits:4|nullable",
-                'email_adfc' => 'email|nullable',
-                'email_private' => 'email|nullable',
-                'adfc_id' => "digits:8|nullable"
+                "name" => "required",
+                "email" => "email|required",
             ]
         );
-        Member::create($all);
-        return redirect()->back()->with('success', "Neuer Mitgliedseintrag wurde erzeugt");
+        Team::create($all);
+        return redirect()->back()->with('success', "Neuer AG/OG-Eintrag wurde erzeugt");
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Member $member, Request $request)
+    public function show(Team $team, Request $request)
     {
         $sess = $request->session();
 
@@ -87,20 +80,20 @@ class MemberController extends Controller
         }
         $sess->put("store", $store);
 
-        $member->load(["teams"]);
-        foreach ($member->teams as $team) {
-            $team->team_member->member_role_title = MemberRole::roleName($team->team_member->member_role_id);
+        $team->load(["members"])->with(["member_role"]);
+        foreach ($team->members as $member) {
+            $member->team_member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
         }
         return inertia(
-            'Member/Show',
+            'Team/Show',
             [
-                "member" => $member,
+                "team" => $team,
                 "storeC" => $store
             ]
         );
     }
 
-    public function showWithDialog(Member $member, Request $request)
+    public function showWithDialog(Team $team, Request $request)
     {
         $sess = $request->session();
 
@@ -109,43 +102,40 @@ class MemberController extends Controller
         $store["readonly2"] = $readonly;
         $sess->put("store", $store);
 
-        $teamIndex = $request->query("teamIndex");
-        $member->load(["teams"]);
-        $allTeams = Team::orderBy("name")->get()->map(fn($t) => ["name" => $t->name, "id" => $t->id]);
+        $memberIndex = $request->query("memberIndex");
+        $team->load(["members"]);
+        $allMembers = Member::orderBy("last_name")->orderBy("first_name")->get()->map(fn($m) => ["name" => $m->last_name . ", " . $m->first_name, "id" => $m->id]);
         $memberRoles = MemberRole::all()->map(fn($r) => ["title" => $r->title, "id" => $r->id]);
-        foreach ($member->teams as $team) {
-            $team->team_member->member_role_title = $team->team_member->member_role->title;
+        foreach ($team->members as $member) {
+            $member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
         }
         return inertia(
-            'Member/Show',
+            'Team/Show',
             [
-                "member" => $member,
-                "teamToMemberDialogShown" => true,
-                "teamIndex" => $teamIndex,
-                "allTeams" => $allTeams,
+                "team" => $team,
+                "memberToTeamDialogShown" => true,
+                "memberIndex" => $memberIndex,
+                "allMembers" => $allMembers,
                 "memberRoles" => $memberRoles,
                 "storeC" => $store
             ]
         );
     }
 
-    public function teams(Request $request, int $member_id)
+    public function members(Request $request, int $team_id)
     {
         // this function is only called via fetch from exportExcel (like an api function)
-        if (!Gate::allows('see-member-details', $member_id)) {
-            return [];
-        }
-        $m = Member::find($member_id);
-        $m->load(["teams"]);
+        $t = Team::find($team_id);
+        $t->load(["members"]);
         return [
-            "teams" => $m->teams->map(fn($team) => $team->name)
+            "members" => $t->members->map(fn($member): string => $member->last_name . ", " . $member->first_name)
         ];
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Member $member)
+    public function edit(string $id)
     {
         //
     }
@@ -153,29 +143,25 @@ class MemberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Member $member)
+    public function update(Request $request, Team $team)
     {
         $v = $request->validate([
-            "first_name" => "required",
-            "last_name" => "required",
-            "birthday" => "date|nullable",
-            'email_adfc' => 'email|nullable',
-            'email_private' => 'email|nullable'
-
+            "name" => "required",
+            "email" => "email|required",
         ]);
-        $member->update($v);
-        return redirect()->back()->with('success', "Mitgliedseintrag wurde geändert");
+        $team->update($v);
+        return redirect()->back()->with('success', "AG/OG-Eintrag wurde geändert");
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Member $member, Request $request)
+    public function destroy(Team $team, Request $request)
     {
         $user = $request->user();
         if ($user->isAdmin) {
-            $member->delete();
-            return redirect()->back()->with('success', "Mitgliedseintrag wurde gelöscht");
+            $team->delete();
+            return redirect()->back()->with('success', "AG/OG-Eintrag wurde gelöscht");
         } else {
             abort(403);
         }
@@ -187,13 +173,13 @@ class MemberController extends Controller
             "id" => "required",
             "member_role_id" => "required|min:1|max:3",
             "admin_comments" => "nullable",
-            "member_id" => "required",
+            "team_id" => "required",
         ]);
         $tmid = $v["id"];
         $tm = TeamMember::find($tmid);
         $r = $tm->update($v);
-        $member = Member::find($v["member_id"]);
-        return $this->show($member, $request);
+        $team = Team::find($v["team_id"]);
+        return $this->show($team, $request);
     }
     public function storeTM(Request $request)
     {
@@ -204,7 +190,8 @@ class MemberController extends Controller
             "admin_comments" => "nullable",
         ]);
         TeamMember::create($v);
-        $member = Member::find($v["member_id"]);
-        return $this->show($member, $request);
+        $team = Team::find($v["team_id"]);
+        return $this->show($team, $request);
     }
+
 }

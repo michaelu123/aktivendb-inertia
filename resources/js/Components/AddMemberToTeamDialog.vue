@@ -4,6 +4,7 @@
             <v-card-title>
                 <span class="text-h5">Mitgliedschaft</span>
             </v-card-title>
+            <p>sname {{ r.sname }}</p>
             <v-card-text>
                 <v-container>
                     <v-form
@@ -25,29 +26,30 @@
                         ></v-select>
                         <v-text-field
                             v-model="editedItem.name"
-                            label="Person"
+                            label="AG/Gruppe"
                             readonly
                         ></v-text-field>
-
                         <v-select
-                            v-if="mtForm.id == -1"
-                            v-model="mtForm.team_id"
-                            :items="allTeams"
+                            @keypress="keypr"
+                            @focus="focus"
+                            v-if="editTeamMemberNew"
+                            v-model="mtForm.member_id"
+                            :items="selMembers"
                             item-title="name"
                             item-value="id"
-                            label="AG/Gruppe"
+                            label="Person"
                             required
-                            :rules="[
-                                (v) => v != -1 || 'Bitte AG/Gruppe wählen',
-                            ]"
+                            :rules="[(v) => v != -1 || 'Bitte Person wählen']"
                             :readonly="readonly"
-                            :error="!!mtForm.errors.team_id"
-                            :error-messages="mtForm.errors.team_id"
+                            :error="!!mtForm.errors.member_id"
+                            :error-messages="mtForm.errors.member_id"
                         ></v-select>
                         <v-text-field
-                            v-if="mtForm.id != -1"
-                            v-model="editWindow.teamList.editedTeamMember.name"
-                            label="AG/Gruppe"
+                            v-if="!editTeamMemberNew"
+                            v-model="
+                                editWindow.memberList.editedTeamMember.name
+                            "
+                            label="Person"
                             readonly
                         ></v-text-field>
                         <v-textarea
@@ -80,7 +82,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from "vue";
+import { computed, reactive, watch } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 
@@ -88,10 +90,16 @@ const props = defineProps([
     "editWindow",
     "editedItem",
     "memberRoles",
-    "allTeams",
+    "allMembers",
     "store",
 ]);
+
+const r = reactive({
+    sname: "",
+});
+
 const page = usePage();
+
 const readonly = computed(() => page.props.storeC.readonly2);
 
 const mtForm = useForm({
@@ -102,40 +110,101 @@ const mtForm = useForm({
     admin_comments: "",
 });
 
-watch(props.editWindow.teamList, () => {
-    console.log("watch");
-    mtForm.member_role_id =
-        props.editWindow.teamList.editedTeamMember.team_member.member_role_id ??
-        -1;
-    mtForm.member_id =
-        props.editWindow.teamList.editedTeamMember.team_member.member_id ?? -1;
-    mtForm.team_id =
-        props.editWindow.teamList.editedTeamMember.team_member.team_id ?? -1;
-    mtForm.admin_comments =
-        props.editWindow.teamList.editedTeamMember.team_member.admin_comments ??
-        "";
-    mtForm.id = props.editWindow.teamList.editedTeamMember.team_member.id;
+const selMembers = computed(() => {
+    if (r.sname == "") return props.allMembers;
+    return props.allMembers.filter((m) =>
+        m.name.toLowerCase().includes(r.sname)
+    );
 });
 
+const editTeamMemberNew = computed(
+    () => props.editWindow.memberList.editedTeamMemberIndex == -1
+);
+
+function keypr(x) {
+    r.sname += x.key.toLowerCase();
+    console.log("<<<", r.sname, ">>>");
+}
+
+function focus(_) {
+    r.sname = "";
+}
+
 const invalidForm = computed(
-    () => mtForm.member_role_id == -1 || mtForm.team_id == -1
+    () => mtForm.member_role_id == -1 || mtForm.member_id == -1
 );
 
 function saveTM() {
     console.log("saveTM", mtForm);
     if (mtForm.id == -1) {
-        mtForm.post(route("member.storetm"));
+        mtForm.post(route("team.storetm"));
     } else {
-        mtForm.put(route("member.updatetm"));
+        mtForm.put(route("team.updatetm"));
     }
 }
 
 function closeTM() {
     console.log("closeTM");
     router.get(
-        route("member.show", {
-            member: props.editedItem.id,
+        route("team.show", {
+            team: props.editedItem.id,
         })
     );
 }
 </script>
+
+<!-- script>
+/*
+export default {
+    name: "AddMemberToTeamDialog",
+    props: [
+        "editWindow",
+        "editedItem",
+        "memberRoles",
+        "allMembers",
+        "strictReadonly",
+    ],
+    computed: {
+        editTeamMemberNew() {
+            return (
+                this.editWindow.memberList.editedTeamMemberIndex == -1
+            );
+        },
+        invalidForm() {
+            return (
+                this.editWindow.memberList.editedTeamMember
+                    .project_team_member.member_role_id == -1 ||
+                this.editWindow.memberList.editedTeamMember
+                    .project_team_member.member_id == -1
+            );
+        },
+        selMembers() {
+            if (this.sname == "") return this.allMembers;
+            return this.allMembers.filter((m) =>
+                m.name.toLowerCase().includes(this.sname)
+            );
+        },
+    },
+    data() {
+        return {
+            sname: "",
+        };
+    },
+    methods: {
+        saveTM() {
+            this.$emit("saveTM"); // saveEditTeamMemberWindow
+        },
+        closeTM() {
+            this.$emit("closeTM"); // closeEditTeamMemberWindow
+        },
+        keypr(x) {
+            this.sname += x.key.toLowerCase();
+        },
+        // eslint-disable-next-line no-unused-vars
+        focus(_) {
+            this.sname = "";
+        },
+    },
+};
+*/
+</script -->

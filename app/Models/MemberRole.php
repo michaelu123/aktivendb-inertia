@@ -25,14 +25,25 @@ class MemberRole extends Model
 
   // Relationships
 
-  public function project_team_members()
+  public function team_members()
   {
-    return $this->hasMany('ProjectTeamMember');
+    return $this->hasMany('TeamMember');
   }
 
   public function abilities()
   {
     return $this->belongsToMany('App\Models\Ability', 'ability_member_role')->whereNull('ability_member_role.deleted_at');
+  }
+
+  public static function roleName($id)
+  {
+    if ($id == 1)
+      return "Vorsitz";
+    if ($id == 2)
+      return "Mitglied";
+    if ($id == 3)
+      return "Formales Mitglied";
+    return "?";
   }
 
 }

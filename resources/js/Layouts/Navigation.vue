@@ -14,7 +14,11 @@
             >
                 Aktive
             </v-btn>
-            <v-btn variant="text" to="/project_teams" v-if="is_logged_in">
+            <v-btn
+                variant="text"
+                :to="route('team.index', { pageno: 1 })"
+                v-if="is_logged_in"
+            >
                 AG's/OG's
             </v-btn>
             <v-btn variant="text" to="/history" v-if="may_read_history">

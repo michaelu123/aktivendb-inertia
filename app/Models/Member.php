@@ -74,18 +74,6 @@ class Member extends Model
         'deleted_at'
     ];
 
-    // public static $rules =
-    //     [
-    //         'email_adfc' => 'email',
-    //         'email_private' => 'email',
-    //         'dsgvo_signature' => 'nullable|in:0,1,2',
-    //         'police_certificate' => 'nullable|in:0,1,2',
-    //     ];
-
-    // protected $with = [   // MUH With this, we add the user to a member if applicable, but why?
-    //     'user'
-    // ];
-
     public function getWithDetailsAttribute()
     {
         return Gate::allows('see-member-details', $this->id);
@@ -145,10 +133,17 @@ class Member extends Model
         return $this->hasOne(User::class);
     }
 
-    public function project_teams()
+    public function teams()
     {
-        return $this->belongsToMany('App\Models\ProjectTeam', 'project_team_member')->whereNull('project_team_member.deleted_at')->withPivot(['id', 'member_role_id', 'admin_comments'])->using('App\Models\ProjectTeamMember')->as('project_team_member');
+        return $this->belongsToMany(
+            'App\Models\Team',
+            'project_team_member',
+            "member_id",
+            "project_team_id"
+        )
+            ->whereNull('project_team_member.deleted_at')
+            ->withPivot(['id', 'member_role_id', 'admin_comments'])
+            ->using('App\Models\TeamMember')
+            ->as('team_member');
     }
-
-
 }

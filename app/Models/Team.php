@@ -1,16 +1,18 @@
 <?php
 namespace App\Models;
 
-use App\Observers\ProjectTeamObserver;
+use App\Observers\TeamObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
 
-class ProjectTeam extends Model
+class Team extends Model
 {
 
   use SoftDeletes;
-  use ProjectTeamObserver;
+  use TeamObserver;
+
+  protected $table = "project_teams";
 
   protected $appends = [
     'with_details'
@@ -33,14 +35,23 @@ class ProjectTeam extends Model
 
   public function getWithDetailsAttribute()
   {
-    return Gate::allows('see-project-team-details', $this->id);
+    return Gate::allows('see-team-details', $this->id);
   }
 
   // Relationships
 
   public function members()
   {
-    return $this->belongsToMany('App\Models\Member', 'project_team_member')->whereNull('project_team_member.deleted_at')->withPivot('id', 'member_role_id', 'admin_comments')->using('App\Models\ProjectTeamMember')->as('project_team_member');
+    $res = $this->belongsToMany(
+      'App\Models\Member',
+      'project_team_member',
+      "project_team_id",
+      "member_id"
+    )
+      ->whereNull('project_team_member.deleted_at')
+      ->withPivot('id', 'member_role_id', 'admin_comments')
+      ->using('App\Models\TeamMember')
+      ->as('team_member');
+    return $res;
   }
-
 }

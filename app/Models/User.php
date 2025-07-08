@@ -71,23 +71,23 @@ class User extends Authenticatable
         return $this->belongsTo(Member::class);
     }
 
-    public function has_ability(string $ability_ref, ?ProjectTeam $project_team = null)
+    public function has_ability(string $ability_ref, ?Team $team = null)
     {
-        if ($project_team == null) {
+        if ($team == null) {
             foreach ($this->abilities()->where('global', true)->get() as $user_ability) {
                 if ($user_ability->reference == $ability_ref) {
                     return true;
                 }
             }
         } else {
-            $member = $this->member()->with('project_teams')->first();
+            $member = $this->member()->with('teams')->first();
 
-            foreach ($member->project_teams()->get() as $user_project_team) {
-                if ($project_team->id == $user_project_team->id) {
+            foreach ($member->teams()->get() as $user_team) {
+                if ($team->id == $user_team->id) {
                     $ability = Ability::with('member_roles')->where('reference', $ability_ref)->first();
 
                     foreach ($ability->member_roles as $ability_member_role) {
-                        if ($ability_member_role->id == $user_project_team->project_team_member->member_role_id) {
+                        if ($ability_member_role->id == $user_team->team_member->member_role_id) {
                             return true;
                         }
                     }

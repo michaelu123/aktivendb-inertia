@@ -2326,7 +2326,7 @@ namespace PHPSTORM_META {
     override(\optional(0), type(0));
 
             registerArgumentsSet('auth', 
-'administer-users','add-edit-member','add-edit-project-team','see-member-details','readhistory',);
+'administer-users','add-edit-member','add-edit-team','see-member-details','readhistory',);
         registerArgumentsSet('configs', 
 'app.name','app.env','app.debug','app.url','app.frontend_url',
 'app.asset_url','app.timezone','app.locale','app.fallback_locale','app.faker_locale',

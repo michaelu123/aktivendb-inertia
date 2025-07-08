@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use App\Observers\ProjectTeamMemberObserver;
-use Illuminate\Database\Eloquent\Model;
+use App\Observers\TeamMemberObserver;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ProjectTeamMember extends Pivot
+class TeamMember extends Pivot
 {
   use SoftDeletes;
-  use ProjectTeamMemberObserver;
+  use TeamMemberObserver;
+
+  protected $table = "project_team_member";
 
   public $incrementing = true;
 
@@ -33,9 +34,9 @@ class ProjectTeamMember extends Pivot
     return $this->belongsTo('App\Models\Member');
   }
 
-  public function project_team()
+  public function team()
   {
-    return $this->belongsTo('App\Models\ProjectTeam');
+    return $this->belongsTo('App\Models\Team', "project_team_id");
   }
 
   public function member_role()

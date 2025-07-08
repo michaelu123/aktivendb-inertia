@@ -361,35 +361,25 @@
                     v-if="!readonly && editedItem.id > 0"
                     @click.prevent="addTeamToMember"
                 >
-                    <v-icon start>mdi-plus</v-icon> Mitglied zu AG Hinzufügen
+                    <v-icon start>mdi-plus</v-icon> Mitglied zu AG/OG hinzufügen
                 </v-btn>
 
                 <template v-if="editedItem.id > 0">
                     <v-data-table
                         :headers="editWindow.teamList.headers"
-                        :items="member.project_teams"
+                        :items="member.teams"
                         :search="r.searchEditWindow"
-                        @click:row="viewProjectTeamMemberItem"
+                        @click:row="viewTeamMemberItem"
                     >
                         <template v-slot:top>
-                            <!-- <AddTeamToMemberDialog /> -->
                             <AddTeamToMemberDialog
                                 v-if="teamToMemberDialogShown"
                                 :editWindow="editWindow"
                                 :editedItem="editedItem"
                                 :memberRoles="memberRoles"
-                                :allProjectTeams="allProjectTeams"
+                                :allTeams="allTeams"
                                 :readonly="readonly"
                             />
-                            <!-- <AddTeamToMemberDialog
-                                :editWindow="editWindow"
-                                :editedItem="editedItem"
-                                :memberRoles="memberRoles"
-                                :allProjectTeams="allProjectTeams"
-                                :readonly="readonly"
-                                @closeTM="closeEditProjectTeamMemberWindow"
-                                @saveTM="saveEditProjectTeamMemberWindow"
-                            /> -->
                             <v-spacer></v-spacer>
                             <v-text-field
                                 v-model="r.searchEditWindow"
@@ -403,13 +393,13 @@
                             <v-icon
                                 size="small"
                                 class="mr-2"
-                                @click.stop="editProjectTeamMemberItem(item)"
+                                @click.stop="editTeamMemberItem(item)"
                                 v-if="!readonly"
                                 >mdi-pencil
                             </v-icon>
                             <v-icon
                                 size="small"
-                                @click.stop="deleteProjectTeamMemberItem(item)"
+                                @click.stop="deleteTeamMemberItem(item)"
                                 v-if="!readonly"
                                 >mdi-delete
                             </v-icon>
@@ -444,14 +434,14 @@ const props = defineProps({
     member: Object,
     teamToMemberDialogShown: Boolean,
     teamIndex: -1,
-    allProjectTeams: Array,
+    allTeams: Array,
     memberRoles: Array,
     storeC: Object,
     storeS: Object,
     // without errors,flash,user console shows warnings!?
-    errors: Object,
-    flash: Object,
-    user: Object,
+    // errors: Object,
+    // flash: Object,
+    // user: Object,
 });
 
 let readonly = computed(() => props.storeC.readonly1);
@@ -482,7 +472,7 @@ const editedItem = useForm({
     responded_to_questionaire_at: props.member.responded_to_questionaire_at,
     sgvo_signature: props.member.dsgvo_signature,
     police_certificate: props.member.police_certificate,
-    project_teams: props.member.project_teams ?? [],
+    teams: props.member.teams ?? [],
 });
 
 const alert = reactive({
@@ -524,35 +514,18 @@ const editWindow = reactive({
             },
             {
                 title: "Funktion",
-                key: "project_team_member.member_role_title",
+                key: "team_member.member_role_title",
             },
         ],
-        editProjectTeamMemberWindow: {
-            shown: false,
-            formValid: true,
-            saveInProgress: false,
-            errors: {},
-        },
-        editedProjectTeamMemberIndex: -1,
-        editedProjectTeamMember: {
-            project_team_member: {
+        editedTeamMemberIndex: -1,
+        editedTeamMember: {
+            team_member: {
                 admin_comments: "",
                 id: -1,
                 member_id: props.member.id,
                 member_role_id: -1,
                 member_role_title: "",
-                project_team_id: -1,
-            },
-            name: "",
-        },
-        defaultProjectTeamMember: {
-            project_team_member: {
-                admin_comments: "",
-                id: -1,
-                member_id: props.member.id,
-                member_role_id: -1,
-                member_role_title: "",
-                project_team_id: -1,
+                team_id: -1,
             },
             name: "",
         },
@@ -569,20 +542,19 @@ const page = usePage();
 
 onMounted(() => {
     editWindow.shown = !!props.teamToMemberDialogShown;
-    editWindow.teamList.editedProjectTeamMemberIndex = props.teamIndex;
+    editWindow.teamList.editedTeamMemberIndex = props.teamIndex;
 
     if (props.teamIndex && props.teamIndex >= 0) {
         Object.assign(
-            editWindow.teamList.editedProjectTeamMember,
-            props.member.project_teams[props.teamIndex]
+            editWindow.teamList.editedTeamMember,
+            props.member.teams[props.teamIndex]
         );
-        editWindow.teamList.editProjectTeamMemberWindow.shown = true;
     } else {
-        editWindow.teamList.editedProjectTeamMember = {
-            project_team_member: {
+        editWindow.teamList.editedTeamMember = {
+            team_member: {
                 id: -1,
                 member_id: props.member.id,
-                project_team_id: -1,
+                team_id: -1,
                 member_role_id: -1,
                 admin_comments: "",
                 member_role_title: "",
@@ -601,10 +573,10 @@ onMounted(() => {
             reference: "",
         };
         if (
-            props.allProjectTeams &&
-            props.allProjectTeams[props.allProjectTeams.length - 1].id != -1
+            props.allTeams &&
+            props.allTeams[props.allTeams.length - 1].id != -1
         ) {
-            props.allProjectTeams.push({
+            props.allTeams.push({
                 name: "bitte wählen",
                 id: -1,
                 props: { disabled: true },
@@ -701,8 +673,8 @@ function setResponded(e) {
     }
 }
 
-function showProjectTeamMemberItem(item, readonly) {
-    const teamIndex = props.member.project_teams.indexOf(item);
+function showTeamMemberItem(item, readonly) {
+    const teamIndex = props.member.teams.indexOf(item);
     router.get(
         route("member.showWithDialog", {
             member: props.member.id,
@@ -710,116 +682,31 @@ function showProjectTeamMemberItem(item, readonly) {
             teamIndex,
         })
     );
-
-    // editWindow.teamList.editedProjectTeamMemberIndex =
-    //     props.member.project_teams.indexOf(item);
-    // editWindow.teamList.editProjectTeamMemberWindow.loading = true;
-
-    // editWindow.teamList.editedProjectTeamMember = Object.assign(
-    //     props.member.project_teams[
-    //         editWindow.teamList.editedProjectTeamMemberIndex
-    //     ],
-    //     item
-    // );
-
-    // editWindow.teamList.editProjectTeamMemberWindow.shown = true;
 }
 
-function viewProjectTeamMemberItem(ev, { item }) {
-    showProjectTeamMemberItem(item, true);
+function viewTeamMemberItem(ev, { item }) {
+    showTeamMemberItem(item, true);
 }
 
-function editProjectTeamMemberItem(item) {
-    showProjectTeamMemberItem(item, false);
+function editTeamMemberItem(item) {
+    showTeamMemberItem(item, false);
 }
 
 function addTeamToMember() {
-    showProjectTeamMemberItem({}, false);
+    showTeamMemberItem({}, false);
 }
 
-function deleteProjectTeamMemberItem(item) {
-    // var index = editedItem.project_teams.indexOf(item);
-    // if (confirm("Are you sure you want to delete this item?")) {
-    //     var projectTeamMember =
-    //         editedItem.project_teams[index].project_team_member.id;
-    //     $http
-    //         .delete(
-    //             "/api/project-team-member/" +
-    //                 projectTeamMember +
-    //                 "?token=" +
-    //                 sessionStorage.getItem("token")
-    //         )
-    //         .then(function () {
-    //             var tmpEditedItem = editedItem;
-    //             tmpEditedItem.project_teams.splice(index, 1);
-    //             editedItem = Object.assign({}, tmpEditedItem);
-    //             showAlert("success", "Gelöscht");
-    //         })
-    //         .catch(function (error) {
-    //             handleRequestError(error);
-    //         });
-    // }
-}
-
-function saveEditProjectTeamMemberWindow() {
-    console.log("saveEditProjectTeamMemberWindow");
-
-    // var tm = editWindow.teamList.editedProjectTeamMember;
-    // var tmx = editWindow.teamList.editedProjectTeamMemberIndex;
-    // editWindow.teamList.editProjectTeamMemberWindow.saveInProgress = true;
-    // if (tmx > -1) {
-    //     var projectTeamMemberId = tm.project_team_member.id;
-    //     $http
-    //         .put(
-    //             "/api/project-team-member/" +
-    //                 projectTeamMemberId +
-    //                 "?token=" +
-    //                 sessionStorage.getItem("token"),
-    //             tm.project_team_member
-    //         )
-    //         .then(function (response) {
-    //             Object.assign(
-    //                 projectTeams[tmx].project_team_member,
-    //                 response.data
-    //             );
-    //             closeEditProjectTeamMemberWindow();
-    //         })
-    //         .catch(function (error) {
-    //             handleRequestError(
-    //                 error,
-    //                 editWindow.teamList.editProjectTeamMemberWindow
-    //             );
-    //         });
-    // } else {
-    //     tm.project_team_member.member_id = editedItem.id;
-    //     $http
-    //         .post(
-    //             "/api/project-team-member?token=" +
-    //                 sessionStorage.getItem("token"),
-    //             tm.project_team_member
-    //         )
-    //         .then(function (response) {
-    //             var projectTeamNewId = response.data.project_team_id;
-    //             var projectTeamNew = allProjectTeams.find(
-    //                 (projectTeam) => projectTeam.id === projectTeamNewId
-    //             );
-    //             projectTeamNew.project_team_member = response.data;
-    //             projectTeams.push(projectTeamNew);
-    //             closeEditProjectTeamMemberWindow();
-    //         })
-    //         .catch(function (error) {
-    //             handleRequestError(
-    //                 error,
-    //                 editWindow.teamList.editProjectTeamMemberWindow
-    //             );
-    //         });
-    // }
+function deleteTeamMemberItem(item) {
+    if (confirm("Wirklich löschen?")) {
+        console.log("deleteTeamMemberItem");
+    }
 }
 
 function closeEW() {
     console.log("closeEW");
     router.get(route("member.index"));
 }
+
 function saveEW() {
     editedItem.last_name = editedItem.last_name.trim();
     editedItem.first_name = editedItem.first_name.trim();
@@ -843,11 +730,6 @@ function showAlert(type, text) {
         alert.shown = false;
         r.loading = false;
     }, 5000);
-}
-
-function closeEditProjectTeamMemberWindow() {
-    console.log("closeEditProjectTeamMemberWindow");
-    editWindow.shown = false;
 }
 
 function lastContactEv() {
