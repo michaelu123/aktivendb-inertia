@@ -103,18 +103,19 @@ const mtForm = useForm({
 });
 
 watch(props.editWindow.teamList, () => {
-    console.log("watch");
     mtForm.member_role_id =
         props.editWindow.teamList.editedTeamMember.team_member.member_role_id ??
         -1;
     mtForm.member_id =
         props.editWindow.teamList.editedTeamMember.team_member.member_id ?? -1;
     mtForm.team_id =
-        props.editWindow.teamList.editedTeamMember.team_member.team_id ?? -1;
+        props.editWindow.teamList.editedTeamMember.team_member
+            .project_team_id ?? -1; // ??
     mtForm.admin_comments =
         props.editWindow.teamList.editedTeamMember.team_member.admin_comments ??
         "";
     mtForm.id = props.editWindow.teamList.editedTeamMember.team_member.id;
+    // console.log("watchTM", JSON.stringify(mtForm));
 });
 
 const invalidForm = computed(
@@ -122,7 +123,7 @@ const invalidForm = computed(
 );
 
 function saveTM() {
-    console.log("saveTM", mtForm);
+    // console.log("saveTM", JSON.stringify(mtForm));
     if (mtForm.id == -1) {
         mtForm.post(route("member.storetm"));
     } else {
@@ -131,7 +132,6 @@ function saveTM() {
 }
 
 function closeTM() {
-    console.log("closeTM");
     router.get(
         route("member.show", {
             member: props.editedItem.id,

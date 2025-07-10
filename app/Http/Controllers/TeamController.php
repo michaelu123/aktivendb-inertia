@@ -7,6 +7,7 @@ use App\Models\MemberRole;
 use App\Models\Team;
 use App\Models\TeamMember;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class TeamController extends Controller
 {
@@ -24,10 +25,16 @@ class TeamController extends Controller
         }
         $sess->put("store", $store);
 
+        $teams = Team::orderBy("name")->get();
+        // $teams = $teams->filter(
+        //     fn($t) => Gate::allows("edit-team-details", $t->id)
+        // )->values();
+
         return inertia(
             'Team/Index',
             [
-                "teams" => Team::orderBy("name")->get(),
+                "teams" => $teams,
+                // "teams" => Team::orderBy("name")->get(),
                 "storeC" => $store
             ]
         );
@@ -36,13 +43,18 @@ class TeamController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $team = new Team;
         $team->id = -1;
+        $store = $request->session()->get("store", []);
+        $store["readonly1"] = false;
         return inertia(
             'Team/Show',
-            ["team" => $team]
+            [
+                "team" => $team,
+                "storeC" => $store
+            ]
         );
     }
 
@@ -59,7 +71,7 @@ class TeamController extends Controller
             ]
         );
         Team::create($all);
-        return redirect()->back()->with('success', "Neuer AG/OG-Eintrag wurde erzeugt");
+        return redirect()->route("team.index")->with('success', "Neuer AG/OG-Eintrag wurde erzeugt");
     }
 
     /**
@@ -80,9 +92,13 @@ class TeamController extends Controller
         }
         $sess->put("store", $store);
 
-        $team->load(["members"])->with(["member_role"]);
-        foreach ($team->members as $member) {
-            $member->team_member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
+        if (Gate::allows("edit-team-details", $team->id)) {
+            $team->load(["members"])->with(["member_role"]);
+            foreach ($team->members as $member) {
+                $member->team_member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
+            }
+        } else {
+            $team->members = [];
         }
         return inertia(
             'Team/Show',
@@ -125,6 +141,14 @@ class TeamController extends Controller
     public function members(Request $request, int $team_id)
     {
         // this function is only called via fetch from exportExcel (like an api function)
+
+
+        if (!Gate::allows("edit-team-details", $team_id)) {
+            return [
+                "members" => []
+            ];
+        }
+
         $t = Team::find($team_id);
         $t->load(["members"]);
         return [
@@ -148,6 +172,9 @@ class TeamController extends Controller
         $v = $request->validate([
             "name" => "required",
             "email" => "email|required",
+            "description" => "nullable",
+            "comments" => "nullable",
+            "needs_first_aid_training" => "nullable",
         ]);
         $team->update($v);
         return redirect()->back()->with('success', "AG/OG-Eintrag wurde geändert");
@@ -171,15 +198,18 @@ class TeamController extends Controller
     {
         $v = $request->validate([
             "id" => "required",
+            "team_id" => "required",
+            "member_id" => "required",
             "member_role_id" => "required|min:1|max:3",
             "admin_comments" => "nullable",
-            "team_id" => "required",
         ]);
         $tmid = $v["id"];
         $tm = TeamMember::find($tmid);
-        $r = $tm->update($v);
-        $team = Team::find($v["team_id"]);
-        return $this->show($team, $request);
+        $teamId = $v["team_id"];
+        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
+        unset($v["team_id"]);
+        $tm->update($v);
+        return redirect()->route("team.show", ["team" => $teamId])->with('success', "Mitgliedseintrag in AG/OG wurde geändert");
     }
     public function storeTM(Request $request)
     {
@@ -189,9 +219,19 @@ class TeamController extends Controller
             "member_role_id" => "required|min:1|max:3",
             "admin_comments" => "nullable",
         ]);
+        $teamId = $v["team_id"];
+        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
+        unset($v["team_id"]);
         TeamMember::create($v);
-        $team = Team::find($v["team_id"]);
-        return $this->show($team, $request);
+        return redirect()->route("team.show", ["team" => $teamId])->with('success', "Mitgliedseintrag wurde AG/OG hinzugefügt");
+    }
+
+    public function destroyTM(Request $request, int $id)
+    {
+        // TODO check rights
+        $tm = TeamMember::find($id);
+        $tm->delete();
+        return redirect()->back()->with('success', "Mitgliedseintrag wurde aus AG/OG gelöscht");
     }
 
 }

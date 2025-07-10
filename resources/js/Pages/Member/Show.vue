@@ -576,7 +576,7 @@ onMounted(() => {
             props.allTeams &&
             props.allTeams[props.allTeams.length - 1].id != -1
         ) {
-            props.allTeams.push({
+            props.allTeams.unshift({
                 name: "bitte wählen",
                 id: -1,
                 props: { disabled: true },
@@ -586,7 +586,7 @@ onMounted(() => {
             props.memberRoles &&
             props.memberRoles[props.memberRoles.length - 1].id != -1
         ) {
-            props.memberRoles.push({
+            props.memberRoles.unshift({
                 title: "bitte wählen",
                 id: -1,
                 props: { disabled: true },
@@ -698,12 +698,11 @@ function addTeamToMember() {
 
 function deleteTeamMemberItem(item) {
     if (confirm("Wirklich löschen?")) {
-        console.log("deleteTeamMemberItem");
+        router.delete(route("team.destroytm", { id: item.team_member.id }));
     }
 }
 
 function closeEW() {
-    console.log("closeEW");
     router.get(route("member.index"));
 }
 
@@ -711,13 +710,13 @@ function saveEW() {
     editedItem.last_name = editedItem.last_name.trim();
     editedItem.first_name = editedItem.first_name.trim();
     editedItem.name = editedItem.last_name + ", " + editedItem.first_name;
-    console.log("editedItem", JSON.stringify(editedItem));
+    // console.log("saveEW", JSON.stringify(editedItem));
     if (editedItem.id == -1) {
         // router.post(route("member.store", editedItem));
         editedItem.post(route("member.store"));
     } else {
         // router.put(route("member.update", editedItem));
-        editedItem.put(route("member.update"), { member: editedItem.id });
+        editedItem.put(route("member.update", { member: editedItem.id }));
     }
 }
 

@@ -313,7 +313,7 @@ const headers = [
 const r = reactive({
     search: "",
     activeSwitch: true,
-    agSwitch: false,
+    agSwitch: true,
     loading: false,
     excelFileName: "",
     preferredEmail: "Bevorzugte Email-Adresse",
@@ -341,11 +341,9 @@ function showItem(item, readonly) {
     router.get(
         route("member.show", { member: item.id, readonly, pageno: r.pageno })
     );
-    console.log("showItem", readonly);
 }
 
 function viewItem(ev, { item }) {
-    console.log("viewitem", item);
     showItem(item, true);
 }
 
@@ -406,7 +404,6 @@ async function exportExcel() {
 }
 
 function prefer(t) {
-    console.log("prefer", t);
     r.preferredEmail = "Bevorzugt: " + t;
 }
 

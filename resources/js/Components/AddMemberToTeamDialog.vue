@@ -4,7 +4,6 @@
             <v-card-title>
                 <span class="text-h5">Mitgliedschaft</span>
             </v-card-title>
-            <p>sname {{ r.sname }}</p>
             <v-card-text>
                 <v-container>
                     <v-form
@@ -110,6 +109,23 @@ const mtForm = useForm({
     admin_comments: "",
 });
 
+watch(props.editWindow.memberList, () => {
+    mtForm.member_role_id =
+        props.editWindow.memberList.editedTeamMember.team_member
+            .member_role_id ?? -1;
+    mtForm.member_id =
+        props.editWindow.memberList.editedTeamMember.team_member.member_id ??
+        -1;
+    mtForm.team_id =
+        props.editWindow.memberList.editedTeamMember.team_member
+            .project_team_id ?? -1; // !!
+    mtForm.admin_comments =
+        props.editWindow.memberList.editedTeamMember.team_member
+            .admin_comments ?? "";
+    mtForm.id = props.editWindow.memberList.editedTeamMember.team_member.id;
+    // console.log("watchMT", JSON.stringify(mtForm));
+});
+
 const selMembers = computed(() => {
     if (r.sname == "") return props.allMembers;
     return props.allMembers.filter((m) =>
@@ -123,7 +139,6 @@ const editTeamMemberNew = computed(
 
 function keypr(x) {
     r.sname += x.key.toLowerCase();
-    console.log("<<<", r.sname, ">>>");
 }
 
 function focus(_) {
@@ -135,7 +150,7 @@ const invalidForm = computed(
 );
 
 function saveTM() {
-    console.log("saveTM", mtForm);
+    // console.log("saveTM", mtForm);
     if (mtForm.id == -1) {
         mtForm.post(route("team.storetm"));
     } else {
@@ -144,7 +159,6 @@ function saveTM() {
 }
 
 function closeTM() {
-    console.log("closeTM");
     router.get(
         route("team.show", {
             team: props.editedItem.id,

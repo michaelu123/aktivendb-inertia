@@ -30,7 +30,7 @@ class MemberController extends Controller
         return inertia(
             'Member/Index',
             [
-                "members" => Member::orderBy("last_name")->get(),
+                "members" => Member::orderBy("last_name")->orderBy("first_name")->orderBy("first_name")->get(),
                 "storeC" => $store
             ]
         );
@@ -39,8 +39,13 @@ class MemberController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        $user = $request->user();
+        if (!$user->isAdmin) {
+            abort(403);
+        }
+
         $member = new Member;
         $member->id = -1;
         return inertia(
@@ -54,6 +59,11 @@ class MemberController extends Controller
      */
     public function store(Request $request)
     {
+        $user = $request->user();
+        if (!$user->isAdmin) {
+            abort(403);
+        }
+
         $all = $request->all();
         $v = $request->validate(
             [
@@ -74,6 +84,9 @@ class MemberController extends Controller
      */
     public function show(Member $member, Request $request)
     {
+        if (!Gate::allows('see-member-details', $member->id)) {
+            abort(403);
+        }
         $sess = $request->session();
 
         $store = $sess->get("store", []);
@@ -102,6 +115,9 @@ class MemberController extends Controller
 
     public function showWithDialog(Member $member, Request $request)
     {
+        if (!Gate::allows('see-member-details', $member->id)) {
+            abort(403);
+        }
         $sess = $request->session();
 
         $store = $sess->get("store", []);
@@ -155,15 +171,21 @@ class MemberController extends Controller
      */
     public function update(Request $request, Member $member)
     {
+        $user = $request->user();
+        if (!$user->isAdmin && $user->id != $member->id) {
+            abort(403);
+        }
+
+        $all = $request->all();
         $v = $request->validate([
             "first_name" => "required",
             "last_name" => "required",
             "birthday" => "date|nullable",
             'email_adfc' => 'email|nullable',
-            'email_private' => 'email|nullable'
-
+            'email_private' => 'email|nullable',
+            'adfc_id' => "digits:8|nullable"
         ]);
-        $member->update($v);
+        $member->update($all);
         return redirect()->back()->with('success', "Mitgliedseintrag wurde geändert");
     }
 
@@ -173,27 +195,34 @@ class MemberController extends Controller
     public function destroy(Member $member, Request $request)
     {
         $user = $request->user();
-        if ($user->isAdmin) {
-            $member->delete();
-            return redirect()->back()->with('success', "Mitgliedseintrag wurde gelöscht");
-        } else {
+        if (!$user->isAdmin) {
             abort(403);
         }
+        $member->delete();
+        return redirect()->back()->with('success', "Mitgliedseintrag wurde gelöscht");
     }
 
     public function updateTM(Request $request)
     {
         $v = $request->validate([
             "id" => "required",
+            "team_id" => "required",
+            "member_id" => "required",
             "member_role_id" => "required|min:1|max:3",
             "admin_comments" => "nullable",
-            "member_id" => "required",
         ]);
         $tmid = $v["id"];
         $tm = TeamMember::find($tmid);
-        $r = $tm->update($v);
-        $member = Member::find($v["member_id"]);
-        return $this->show($member, $request);
+        $teamId = $v["team_id"];
+        if (!Gate::allows("edit-team-details", $teamId)) {
+            abort(403);
+        }
+        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
+        unset($v["team_id"]);
+        $tm->update($v);
+        return redirect()
+            ->route("member.show", ["member" => $v["member_id"]])
+            ->with('success', "AG/OG-Eintrag wurde geändert");
     }
     public function storeTM(Request $request)
     {
@@ -203,8 +232,26 @@ class MemberController extends Controller
             "member_role_id" => "required|min:1|max:3",
             "admin_comments" => "nullable",
         ]);
+        $teamId = $v["team_id"];
+        if (!Gate::allows("edit-team-details", $teamId)) {
+            abort(403);
+        }
+        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
+        unset($v["team_id"]);
         TeamMember::create($v);
         $member = Member::find($v["member_id"]);
-        return $this->show($member, $request);
+        return redirect()->route("member.show", ["member" => $v["member_id"]])->with('success', "Neuer AG/OG-Eintrag wurde erzeugt");
     }
+
+    public function destroyTM(Request $request, int $id)
+    {
+        // TODO check rights
+        $tm = TeamMember::find($id);
+        if (!Gate::allows("edit-team-details", $tm->project_team_id)) {
+            abort(403);
+        }
+        $tm->delete();
+        return redirect()->back()->with('success', "AG/OG-Eintrag wurde gelöscht");
+    }
+
 }

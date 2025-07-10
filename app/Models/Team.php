@@ -35,7 +35,8 @@ class Team extends Model
 
   public function getWithDetailsAttribute()
   {
-    return Gate::allows('see-team-details', $this->id);
+    // return true; // filtering done in TeamController
+    return Gate::allows('edit-team-details', $this->id);
   }
 
   // Relationships

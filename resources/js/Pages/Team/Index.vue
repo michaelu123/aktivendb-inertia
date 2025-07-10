@@ -15,7 +15,7 @@
         </v-card-title>
         <v-data-table
             :headers="headers"
-            :items="teams"
+            :items="selTeams"
             :search="r.search"
             :loading="r.loading"
             loading-text="Wird geladen..."
@@ -33,6 +33,13 @@
                 >
                     <v-icon start>mdi-plus</v-icon> AG/OG Hinzufügen
                 </v-btn>
+                <v-switch
+                    v-model="r.myAgSwitch"
+                    label="Nur AGs/OGs deren Leiter ich bin"
+                    class="mr-4"
+                >
+                </v-switch>
+
                 <v-spacer></v-spacer>
 
                 <v-sheet color="grey-lighten-3" align="center">
@@ -111,8 +118,7 @@
 </template>
 
 <script setup>
-import { toAbgegeben, checkForTrue } from "@/utils";
-import { reactive } from "vue";
+import { computed, reactive } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 import writeXlsxFile from "write-excel-file";
@@ -138,6 +144,7 @@ const headers = [
 const r = reactive({
     search: "",
     activeSwitch: true,
+    myAgSwitch: true,
     loading: false,
     excelFileName: "",
     loadingMembers: false,
@@ -148,6 +155,13 @@ const alert = reactive({
     shown: false,
     text: "",
     type: "success",
+});
+
+const selTeams = computed(() => {
+    if (r.myAgSwitch) {
+        return props.teams.filter((t) => t.with_details);
+    }
+    return props.teams;
 });
 
 const page = usePage();
@@ -164,11 +178,9 @@ function showItem(item, readonly) {
     router.get(
         route("team.show", { team: item.id, readonly, pageno: r.pageno })
     );
-    console.log("showItem", readonly);
 }
 
 function viewItem(ev, { item }) {
-    console.log("viewitem", item);
     showItem(item, true);
 }
 
@@ -209,7 +221,6 @@ async function exportExcel() {
                     .filter((m) => m.team_member.member_role_title == "Vorsitz")
                     .map((m) => m.first_name + " " + m.last_name)
                     .join(", ");
-                console.log("leaders", t.name, t.leaders);
                 myTeams.push(t);
             } catch (ex) {
                 console.log("ex!!", ex);

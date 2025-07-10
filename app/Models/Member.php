@@ -82,16 +82,6 @@ class Member extends Model
     public static function create(array $attributes = [])
     {
         $model = static::query()->create($attributes);
-
-        //    if (array_key_exists('createUser', $attributes) && $attributes['createUser'])
-        //    {
-        //      $user = $model->user()->create([
-        //        'email_adfc' => $attributes['email'],
-        //        'email_private' => $attributes['email'],
-        //        'password' => 'abc123' // TODO: Passwort nicht statisch speichern
-        //      ]);
-        //    }
-
         return $model;
     }
 

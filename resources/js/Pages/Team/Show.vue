@@ -122,17 +122,29 @@
                         "
                     ></v-switch>
                 </v-form>
-                <v-btn
-                    color="primary"
-                    variant="outlined"
-                    class="mb-2"
-                    v-bind="props"
-                    v-if="!readonly && editedItem.id > 0"
-                    @click.prevent="addMemberToTeam"
-                >
-                    <v-icon start>mdi-plus</v-icon> AG/OG zu Mitglied hinzufügen
-                </v-btn>
-
+                <v-card-title>
+                    <span class="text-h5">Liste der Mitglieder</span>
+                </v-card-title>
+                <v-row class="items-center mt-4">
+                    <v-switch
+                        class="ml-2"
+                        v-model="r.activeSwitch"
+                        label="Nur Aktive auflisten"
+                    >
+                    </v-switch>
+                    <v-spacer />
+                    <v-btn
+                        color="primary"
+                        variant="outlined"
+                        class="mb-2"
+                        v-bind="props"
+                        v-if="!readonly && editedItem.id > 0"
+                        @click.prevent="addMemberToTeam"
+                    >
+                        <v-icon start>mdi-plus</v-icon> Mitglied zu AG/OG
+                        hinzufügen
+                    </v-btn>
+                </v-row>
                 <template v-if="editedItem.id > 0">
                     <v-data-table
                         :headers="editWindow.memberList.headers"
@@ -161,12 +173,6 @@
                                 single-line
                                 hide-details
                             ></v-text-field>
-                            <v-switch
-                                class="ml-2"
-                                v-model="r.activeSwitch"
-                                label="Nur Aktive"
-                            >
-                            </v-switch>
                         </template>
                         <template v-slot:item.action="{ item }">
                             <v-icon
@@ -318,7 +324,7 @@ onMounted(() => {
             props.allMembers &&
             props.allMembers[props.allMembers.length - 1].id != -1
         ) {
-            props.allMembers.push({
+            props.allMembers.unshift({
                 name: "bitte wählen",
                 id: -1,
                 props: { disabled: true },
@@ -328,7 +334,7 @@ onMounted(() => {
             props.memberRoles &&
             props.memberRoles[props.memberRoles.length - 1].id != -1
         ) {
-            props.memberRoles.push({
+            props.memberRoles.unshift({
                 title: "bitte wählen",
                 id: -1,
                 props: { disabled: true },
@@ -362,24 +368,23 @@ function addMemberToTeam() {
 
 function deleteTeamMemberItem(item) {
     if (confirm("Wirklich löschen?")) {
-        console.log("deleteTeamMemberItem");
+        router.delete(route("team.destroytm", { id: item.team_member.id }));
     }
 }
 
 function closeEW() {
-    console.log("closeEW");
     router.get(route("team.index"));
 }
 
 function saveEW() {
     editedItem.name = editedItem.name.trim();
-    console.log("saveEW", JSON.stringify(editedItem));
+    // console.log("saveEW", JSON.stringify(editedItem));
     if (editedItem.id == -1) {
         // router.post(route("member.store", editedItem));
         editedItem.post(route("team.store"));
     } else {
         // router.put(route("member.update", editedItem));
-        editedItem.put(route("team.update"), { team: editedItem.id });
+        editedItem.put(route("team.update", { team: editedItem.id }));
     }
 }
 
@@ -420,7 +425,6 @@ async function exportExcel() {
 }
 
 function prefer(t) {
-    // console.log("prefer", t);
     r.preferredEmail = "Bevorzugt: " + t;
 }
 </script>
