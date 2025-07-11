@@ -21,7 +21,11 @@
             >
                 AG's/OG's
             </v-btn>
-            <v-btn variant="text" to="/history" v-if="may_read_history">
+            <v-btn
+                variant="text"
+                :to="route('history.show')"
+                v-if="may_read_history"
+            >
                 History</v-btn
             >
         </v-toolbar-items>

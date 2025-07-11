@@ -1,7 +1,3 @@
-<!-- <template>
-    <v-data-table :headers="headers" :items="members"> </v-data-table>
-</template> -->
-
 <template>
     <v-card>
         <v-card-title>
@@ -27,6 +23,14 @@
             @click:row="viewItem"
         >
             <template v-slot:top>
+                <HistoryDialog
+                    v-if="history && history.length > 0"
+                    :teams="teams"
+                    :members="members"
+                    :users="users"
+                    :history="history"
+                    :retour="retour"
+                />
                 <v-row class="ml-2">
                     <v-btn
                         color="primary"
@@ -210,13 +214,22 @@
 </template>
 
 <script setup>
+import HistoryDialog from "@/Components/HistoryDialog.vue";
 import { toAbgegeben, checkForTrue, makeSchema } from "@/utils";
 import { reactive } from "vue";
-import { router, usePage } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 import writeXlsxFile from "write-excel-file";
 
-const props = defineProps({ members: Array, storeC: Object, storeS: Object });
+const props = defineProps({
+    members: Array,
+    teams: Array,
+    users: Array,
+    history: Array,
+    storeC: Object,
+    storeS: Object,
+    retour: String,
+});
 
 const headers = [
     {
@@ -423,5 +436,18 @@ async function getMemberTeamsFromApi(id) {
     const res = await resp.json();
     console.log("res", res);
     return res.teams;
+}
+
+function historyItem(item) {
+    console.log("historyM", item.id);
+    const hform = useForm({
+        begin: "",
+        end: "",
+        id: item.id,
+        m_or_t: "m",
+    });
+    hform.post(
+        route("member.showWithHistory", { member: item.id, pageno: r.pageno })
+    );
 }
 </script>

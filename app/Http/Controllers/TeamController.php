@@ -6,6 +6,7 @@ use App\Models\Member;
 use App\Models\MemberRole;
 use App\Models\Team;
 use App\Models\TeamMember;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -137,6 +138,40 @@ class TeamController extends Controller
             ]
         );
     }
+
+    public function showWithHistory(Team $team, Request $request)
+    {
+        if (!Gate::allows('readhistory')) {
+            abort(403);
+        }
+        $sess = $request->session();
+        $store = $sess->get("store", []);
+        $pageno = $request->query("pageno", null);
+        if ($pageno !== null) {
+            $store["pageno"] = $pageno;
+        }
+        $sess->put("store", $store);
+        $id = $request->all()["id"]; // TODO? get?
+        $history = HistoryController::getByTableAndId("project_teams", $id);
+        $users = User::all()->map(fn($u) => ["email" => $u->email, "id" => $u->id]);
+        // $teams = Team::all()->map(fn($t) => ["name" => $t->name, "id" => $t->id]);
+        $members = Member::all()->map(fn($m) => ["name" => $m->last_name . ", " . $m->first_name, "id" => $m->id]);
+        $teams = [$team];
+
+        return inertia(
+            'Team/Index',
+            [
+                "members" => $members,
+                "teams" => $teams,
+                "users" => $users,
+                "history" => $history,
+                "storeC" => $store,
+                "retour" => "team.index"
+            ]
+        );
+    }
+
+
 
     public function members(Request $request, int $team_id)
     {

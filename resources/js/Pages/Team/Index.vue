@@ -23,6 +23,14 @@
             v-model:page="r.pageno"
         >
             <template v-slot:top>
+                <HistoryDialog
+                    v-if="history && history.length > 0"
+                    :teams="teams"
+                    :members="members"
+                    :users="users"
+                    :history="history"
+                    :retour="retour"
+                />
                 <v-btn
                     color="primary"
                     variant="outlined"
@@ -118,12 +126,21 @@
 </template>
 
 <script setup>
+import HistoryDialog from "@/Components/HistoryDialog.vue";
 import { computed, reactive } from "vue";
-import { router, usePage } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 import writeXlsxFile from "write-excel-file";
 
-const props = defineProps({ teams: Array, storeC: Object, storeS: Object });
+const props = defineProps({
+    members: Array,
+    teams: Array,
+    users: Array,
+    history: Array,
+    storeC: Object,
+    storeS: Object,
+    retour: String,
+});
 
 const headers = [
     {
@@ -295,5 +312,18 @@ async function getTeamMembersFromApi(id) {
     const res = await resp.json();
     console.log("res", res);
     return res.members;
+}
+
+function historyItem(item) {
+    console.log("historyT", item.id);
+    const hform = useForm({
+        begin: "",
+        end: "",
+        id: item.id,
+        m_or_t: "t",
+    });
+    hform.post(
+        route("team.showWithHistory", { team: item.id, pageno: r.pageno })
+    );
 }
 </script>
