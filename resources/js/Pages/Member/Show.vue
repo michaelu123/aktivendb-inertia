@@ -14,15 +14,7 @@
                 </v-alert>
             </div>
         </v-card-title>
-        <v-card-text v-if="editWindow.loading">
-            Wird geladen...
-            <v-progress-circular
-                indeterminate
-                color="primary"
-            ></v-progress-circular>
-        </v-card-text>
-
-        <v-card-text v-if="!editWindow.loading">
+        <v-card-text>
             <v-container>
                 <v-row v-if="isAdmin()">
                     <v-btn
@@ -323,6 +315,8 @@
                         <v-switch
                             class="mr-5"
                             v-model="editedItem.active"
+                            color="green"
+                            :base-color="editedItem.active ? 'green' : 'red'"
                             label="Aktiv"
                             :disabled="readonly"
                             :value-comparator="checkForTrue"
@@ -334,6 +328,12 @@
                             v-model="
                                 editedItem.registered_for_first_aid_training
                             "
+                            color="green"
+                            :base-color="
+                                editedItem.registered_for_first_aid_training
+                                    ? 'green'
+                                    : 'red'
+                            "
                             label="Registriert für Erste-Hilfe-Kurs"
                             :disabled="readonly"
                             :value-comparator="checkForTrue"
@@ -344,6 +344,12 @@
                         <v-switch
                             class="ml-5"
                             v-model="editedItem.responded_to_questionaire"
+                            color="green"
+                            :base-color="
+                                editedItem.responded_to_questionaire
+                                    ? 'green'
+                                    : 'red'
+                            "
                             label="Fragebogen ausgefüllt"
                             :disabled="noAdminOrReadOnly"
                             :value-comparator="checkForTrue"
@@ -412,11 +418,7 @@
         <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn variant="text" @click="closeEW">Abbrechen</v-btn>
-            <v-btn
-                variant="text"
-                @click="saveEW"
-                :loading="editWindow.saveInProgress"
-                v-if="!readonly"
+            <v-btn variant="text" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
         </v-card-actions>
@@ -492,10 +494,8 @@ const r = reactive({
 });
 
 const editWindow = reactive({
-    loading: false,
     shown: false,
     formValid: true,
-    saveInProgress: false,
     errors: {},
     showLatestContactDatePicker: false,
     showLatestFirstAidTrainingDatePicker: false,
@@ -727,7 +727,6 @@ function showAlert(type, text) {
 
     setTimeout(() => {
         alert.shown = false;
-        r.loading = false;
     }, 5000);
 }
 

@@ -138,6 +138,5 @@ function showId() {
     hform.id = r.userId;
     hform.m_or_t = "m";
     hform.post(route("history.showWithHistory"));
-    console.log("showId", JSON.stringify(hform));
 }
 </script>

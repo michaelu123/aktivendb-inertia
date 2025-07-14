@@ -70,7 +70,6 @@
                 <v-btn
                     variant="text"
                     @click="saveTM"
-                    :loading="editWindow.saveInProgress"
                     v-if="!readonly"
                     :disabled="invalidForm"
                     >Speichern</v-btn
@@ -166,59 +165,3 @@ function closeTM() {
     );
 }
 </script>
-
-<!-- script>
-/*
-export default {
-    name: "AddMemberToTeamDialog",
-    props: [
-        "editWindow",
-        "editedItem",
-        "memberRoles",
-        "allMembers",
-        "strictReadonly",
-    ],
-    computed: {
-        editTeamMemberNew() {
-            return (
-                this.editWindow.memberList.editedTeamMemberIndex == -1
-            );
-        },
-        invalidForm() {
-            return (
-                this.editWindow.memberList.editedTeamMember
-                    .project_team_member.member_role_id == -1 ||
-                this.editWindow.memberList.editedTeamMember
-                    .project_team_member.member_id == -1
-            );
-        },
-        selMembers() {
-            if (this.sname == "") return this.allMembers;
-            return this.allMembers.filter((m) =>
-                m.name.toLowerCase().includes(this.sname)
-            );
-        },
-    },
-    data() {
-        return {
-            sname: "",
-        };
-    },
-    methods: {
-        saveTM() {
-            this.$emit("saveTM"); // saveEditTeamMemberWindow
-        },
-        closeTM() {
-            this.$emit("closeTM"); // closeEditTeamMemberWindow
-        },
-        keypr(x) {
-            this.sname += x.key.toLowerCase();
-        },
-        // eslint-disable-next-line no-unused-vars
-        focus(_) {
-            this.sname = "";
-        },
-    },
-};
-*/
-</script -->

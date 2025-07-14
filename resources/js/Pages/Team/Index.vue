@@ -13,13 +13,13 @@
                 </v-alert>
             </div>
         </v-card-title>
+        <p>pc {{ r.pageCount }}</p>
         <v-data-table
             :headers="headers"
             :items="selTeams"
             :search="r.search"
-            :loading="r.loading"
-            loading-text="Wird geladen..."
             @click:row="viewItem"
+            v-model.pageCount="r.pageCount"
             v-model:page="r.pageno"
         >
             <template v-slot:top>
@@ -42,7 +42,10 @@
                     <v-icon start>mdi-plus</v-icon> AG/OG Hinzufügen
                 </v-btn>
                 <v-switch
+                    v-if="!isAdmin()"
                     v-model="r.myAgSwitch"
+                    color="green"
+                    base-color="red"
                     label="Nur AGs/OGs deren Leiter ich bin"
                     class="mr-4"
                 >
@@ -61,12 +64,6 @@
                                 label="Bitte Dateinamen eingeben"
                                 v-model="r.excelFileName"
                             ></v-text-field>
-                            <v-progress-circular
-                                class="mr-4"
-                                v-if="r.loadingMembers"
-                                indeterminate
-                                color="primary"
-                            ></v-progress-circular>
                             <v-spacer></v-spacer>
                             <v-btn
                                 height="60"
@@ -162,10 +159,9 @@ const r = reactive({
     search: "",
     activeSwitch: true,
     myAgSwitch: true,
-    loading: false,
     excelFileName: "",
-    loadingMembers: false,
     pageno: props.storeC.pageno ?? 1,
+    pageCount: 0,
 });
 
 const alert = reactive({
@@ -225,26 +221,21 @@ async function exportExcel() {
     }
 
     let myTeams = [];
-    try {
-        r.loadingMembers = true;
-        for (let t of props.teams) {
-            if (!t.with_details) continue;
-            try {
-                t.members = await getTeamMembersFromApi(m.id);
-                if (r.activeSwitch) {
-                    t.members = t.members.filter((m) => m.active == "1");
-                }
-                t.leaders = t.members
-                    .filter((m) => m.team_member.member_role_title == "Vorsitz")
-                    .map((m) => m.first_name + " " + m.last_name)
-                    .join(", ");
-                myTeams.push(t);
-            } catch (ex) {
-                console.log("ex!!", ex);
+    for (let t of props.teams) {
+        if (!t.with_details) continue;
+        try {
+            t.members = await getTeamMembersFromApi(m.id);
+            if (r.activeSwitch) {
+                t.members = t.members.filter((m) => m.active == "1");
             }
+            t.leaders = t.members
+                .filter((m) => m.team_member.member_role_title == "Vorsitz")
+                .map((m) => m.first_name + " " + m.last_name)
+                .join(", ");
+            myTeams.push(t);
+        } catch (ex) {
+            console.log("ex!!", ex);
         }
-    } finally {
-        r.loadingMembers = false;
     }
     const schema = makeSchema();
 
@@ -303,7 +294,6 @@ function showAlert(type, text) {
 
     setTimeout(() => {
         alert.shown = false;
-        r.loading = false;
     }, 5000);
 }
 
@@ -323,7 +313,7 @@ function historyItem(item) {
         m_or_t: "t",
     });
     hform.post(
-        route("team.showWithHistory", { team: item.id, pageno: r.pageno })
+        route("team.indexWithHistory", { team: item.id, pageno: r.pageno })
     );
 }
 </script>

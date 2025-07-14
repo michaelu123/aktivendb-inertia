@@ -69,7 +69,6 @@
                 <v-btn
                     variant="text"
                     @click="saveTM"
-                    :loading="editWindow.saveInProgress"
                     v-if="!readonly"
                     :disabled="invalidForm"
                     >Speichern</v-btn

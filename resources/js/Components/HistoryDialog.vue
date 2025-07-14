@@ -8,7 +8,6 @@
                     r.alsText ? "Als Tabelle" : "Als Text"
                 }}</v-btn>
             </v-card-title>
-            <p>retour2 {{ props.retour }}</p>
             <v-data-table
                 v-if="!r.alsText"
                 v-model:expanded="r.expanded"
@@ -31,19 +30,21 @@
                     <tr>
                         <td :colspan="columns.length">
                             <table>
-                                <tr>
-                                    <th>Feld</th>
-                                    <th>Alter Wert</th>
-                                    <th>Neuer Wert</th>
-                                </tr>
-                                <tr
-                                    v-for="change in item.changes"
-                                    :key="change.lineNo"
-                                >
-                                    <td>{{ change.propName }}</td>
-                                    <td>{{ change.propOld }}</td>
-                                    <td>{{ change.propNew }}</td>
-                                </tr>
+                                <tbody>
+                                    <tr>
+                                        <th>Feld</th>
+                                        <th>Alter Wert</th>
+                                        <th>Neuer Wert</th>
+                                    </tr>
+                                    <tr
+                                        v-for="change in item.changes"
+                                        :key="change.lineNo"
+                                    >
+                                        <td>{{ change.propName }}</td>
+                                        <td>{{ change.propOld }}</td>
+                                        <td>{{ change.propNew }}</td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </td>
                     </tr>
@@ -202,11 +203,10 @@ function memberName(id) {
     return mn;
 }
 
-watch(props, xxx);
-onMounted(xxx);
+watch(props, prepareData);
+onMounted(prepareData);
 
-function xxx() {
-    console.log("1watch");
+function prepareData() {
     for (const t of props.teams) {
         teamNames[t.id.toString()] = t.name;
     }
@@ -229,7 +229,6 @@ function xxx() {
     r.historyTxt = historyTxt;
     r.historyArray = historyArray;
     r.historyShown = true;
-    console.log("2watch");
 }
 
 function explainHistory(event, email) {

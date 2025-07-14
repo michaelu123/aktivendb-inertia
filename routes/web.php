@@ -23,7 +23,7 @@ Route::resource('member', MemberController::class)
     ->only(['index', 'show', 'create', 'store', 'update', 'destroy']);
 Route::get('member/{id}/teams', [MemberController::class, 'teams'])->middleware("auth")->name("teams");
 Route::get('member/{member}/withdialog', [MemberController::class, 'showWithDialog'])->middleware("auth")->name("member.showWithDialog");
-Route::post('member/{member}/history', [MemberController::class, 'showWithHistory'])->middleware("auth")->name("member.showWithHistory");
+Route::post('member/{member}/history', [MemberController::class, 'indexWithHistory'])->middleware("auth")->name("member.indexWithHistory");
 
 Route::post('team/storetm', [TeamController::class, 'storeTM'])->middleware("auth")->name("team.storetm");
 Route::put('team/updatetm', [TeamController::class, 'updateTM'])->middleware("auth")->name("team.updatetm");
@@ -32,7 +32,7 @@ Route::resource('team', TeamController::class)
     ->only(['index', 'show', 'create', 'store', 'update', 'destroy']);
 Route::get('team/{id}/members', [TeamController::class, 'teams'])->middleware("auth")->name("members");
 Route::get('team/{team}/withdialog', [TeamController::class, 'showWithDialog'])->middleware("auth")->name("team.showWithDialog");
-Route::post('team/{team}/history', [TeamController::class, 'showWithHistory'])->middleware("auth")->name("team.showWithHistory");
+Route::post('team/{team}/history', [TeamController::class, 'indexWithHistory'])->middleware("auth")->name("team.indexWithHistory");
 
 Route::get('history', [HistoryController::class, 'show'])->middleware("auth")->name("history.show");
 Route::post('history', [HistoryController::class, 'showWithHistory'])->middleware("auth")->name("history.showWithHistory");

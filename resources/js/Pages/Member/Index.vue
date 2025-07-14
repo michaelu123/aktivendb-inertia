@@ -17,8 +17,6 @@
             :headers="headers"
             :items="members"
             :search="r.search"
-            :loading="r.loading"
-            loading-text="Wird geladen..."
             v-model:page="r.pageno"
             @click:row="viewItem"
         >
@@ -46,11 +44,15 @@
                         v-model="r.activeSwitch"
                         label="Nur Aktive"
                         class="mr-4"
+                        color="green"
+                        base-color="red"
                     >
                     </v-switch>
                     <v-switch
                         v-if="!isAdmin()"
                         v-model="r.agSwitch"
+                        color="green"
+                        base-color="red"
                         label="Nur AG/OG-Mitglieder"
                     >
                     </v-switch>
@@ -100,12 +102,6 @@
                                     </v-list-item>
                                 </v-list>
                             </v-menu>
-                            <v-progress-circular
-                                class="mr-4"
-                                v-if="r.loadingTeams"
-                                indeterminate
-                                color="primary"
-                            ></v-progress-circular>
                             <v-btn
                                 height="60"
                                 color="primary"
@@ -327,10 +323,8 @@ const r = reactive({
     search: "",
     activeSwitch: true,
     agSwitch: true,
-    loading: false,
     excelFileName: "",
     preferredEmail: "Bevorzugte Email-Adresse",
-    loadingTeams: false,
     pageno: props.storeC.pageno ?? 1,
 });
 
@@ -388,20 +382,15 @@ async function exportExcel() {
     }
 
     let myMembers = [];
-    try {
-        r.loadingTeams = true;
-        for (let m of props.members) {
-            if (!m.with_details) continue;
-            try {
-                m.ags = await getMemberTeamsFromApi(m.id);
-                m.agAll = m.ags.join(",");
-                myMembers.push(m);
-            } catch (ex) {
-                console.log("ex!!", ex);
-            }
+    for (let m of props.members) {
+        if (!m.with_details) continue;
+        try {
+            m.ags = await getMemberTeamsFromApi(m.id);
+            m.agAll = m.ags.join(",");
+            myMembers.push(m);
+        } catch (ex) {
+            console.log("ex!!", ex);
         }
-    } finally {
-        r.loadingTeams = false;
     }
     const schema = makeSchema(myMembers, r.preferredEmail);
 
@@ -447,7 +436,7 @@ function historyItem(item) {
         m_or_t: "m",
     });
     hform.post(
-        route("member.showWithHistory", { member: item.id, pageno: r.pageno })
+        route("member.indexWithHistory", { member: item.id, pageno: r.pageno })
     );
 }
 </script>

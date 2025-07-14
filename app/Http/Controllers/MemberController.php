@@ -152,7 +152,7 @@ class MemberController extends Controller
         );
     }
 
-    public function showWithHistory(Member $member, Request $request)
+    public function indexWithHistory(Member $member, Request $request)
     {
         if (!Gate::allows('readhistory')) {
             abort(403);

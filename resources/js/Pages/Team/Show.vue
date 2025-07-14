@@ -14,13 +14,6 @@
                 </v-alert>
             </div>
         </v-card-title>
-        <v-card-text v-if="editWindow.loading">
-            Wird geladen...
-            <v-progress-circular
-                indeterminate
-                color="primary"
-            ></v-progress-circular>
-        </v-card-text>
 
         <v-sheet color="grey-lighten-3" align="center" v-if="editedItem.id > 0">
             <v-container>
@@ -71,7 +64,7 @@
             </v-container>
         </v-sheet>
 
-        <v-card-text v-if="!editWindow.loading">
+        <v-card-text>
             <v-container>
                 <v-form
                     ref="form"
@@ -113,6 +106,12 @@
                     ></v-textarea>
                     <v-switch
                         v-model="editedItem.needs_first_aid_training"
+                        color="green"
+                        :base-color="
+                            editedItem.needs_first_aid_training
+                                ? 'green'
+                                : 'red'
+                        "
                         label="1. Hilfe Schulung"
                         :disabled="readonly"
                         :value-comparator="checkForTrue"
@@ -130,6 +129,8 @@
                         class="ml-2"
                         v-model="r.activeSwitch"
                         label="Nur Aktive auflisten"
+                        color="green"
+                        base-color="red"
                     >
                     </v-switch>
                     <v-spacer />
@@ -199,11 +200,7 @@
         <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn variant="text" @click="closeEW">Abbrechen</v-btn>
-            <v-btn
-                variant="text"
-                @click="saveEW"
-                :loading="editWindow.saveInProgress"
-                v-if="!readonly"
+            <v-btn variant="text" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
         </v-card-actions>
@@ -255,10 +252,8 @@ const r = reactive({
 });
 
 const editWindow = reactive({
-    loading: false,
     shown: false,
     formValid: true,
-    saveInProgress: false,
     errors: {},
     memberList: {
         headers: [

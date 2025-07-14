@@ -139,7 +139,7 @@ class TeamController extends Controller
         );
     }
 
-    public function showWithHistory(Team $team, Request $request)
+    public function indexWithHistory(Team $team, Request $request)
     {
         if (!Gate::allows('readhistory')) {
             abort(403);
