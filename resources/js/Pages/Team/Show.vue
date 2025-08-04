@@ -14,6 +14,15 @@
                 </v-alert>
             </div>
         </v-card-title>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn variant="text" @click="closeEW">
+                {{ readonly ? "Zurück zu AG's/OG'S" : "Abbrechen" }}
+            </v-btn>
+            <v-btn variant="text" @click="saveEW" v-if="!readonly"
+                >Speichern</v-btn
+            >
+        </v-card-actions>
 
         <v-sheet color="grey-lighten-3" align="center" v-if="editedItem.id > 0">
             <v-container>
@@ -199,7 +208,9 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="closeEW">Abbrechen</v-btn>
+            <v-btn variant="text" @click="closeEW">
+                {{ readonly ? "Zurück zu AG's/OG'S" : "Abbrechen" }}
+            </v-btn>
             <v-btn variant="text" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >

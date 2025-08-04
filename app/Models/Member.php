@@ -41,7 +41,8 @@ class Member extends Model
         'responded_to_questionaire',
         'responded_to_questionaire_at',
         'dsgvo_signature',
-        'police_certificate'
+        'police_certificate',
+        'polcert_date',
     ];
 
     protected $restricted = [
@@ -67,7 +68,8 @@ class Member extends Model
         'responded_to_questionaire',
         'responded_to_questionaire_at',
         'dsgvo_signature',
-        'police_certificate'
+        'police_certificate',
+        'polcert_date',
     ];
 
     protected $dates = [

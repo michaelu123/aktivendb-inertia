@@ -205,6 +205,65 @@
                     </v-icon>
                 </v-avatar>
             </template>
+            <template v-slot:item.dsgvo_signature="{ item }">
+                <v-avatar
+                    color="grey"
+                    size="24"
+                    v-if="item.dsgvo_signature == 0"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-blank-circle
+                    </v-icon>
+                </v-avatar>
+                <v-avatar
+                    color="green"
+                    size="24"
+                    v-if="item.dsgvo_signature == 1"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-marked-circle-outline
+                    </v-icon>
+                </v-avatar>
+                <v-avatar
+                    color="red"
+                    size="24"
+                    v-if="item.dsgvo_signature == 2"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-blank-circle-outline
+                    </v-icon>
+                </v-avatar>
+            </template>
+            <template v-slot:item.police_certificate="{ item }">
+                <v-avatar
+                    color="grey"
+                    size="24"
+                    v-if="item.police_certificate == 0"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-blank-circle
+                    </v-icon>
+                </v-avatar>
+                <v-avatar
+                    color="green"
+                    size="24"
+                    v-if="item.police_certificate == 1"
+                    toabge
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-marked-circle-outline
+                    </v-icon>
+                </v-avatar>
+                <v-avatar
+                    color="red"
+                    size="24"
+                    v-if="item.police_certificate == 2"
+                >
+                    <v-icon size="small" class="text-white">
+                        mdi-checkbox-blank-circle-outline
+                    </v-icon>
+                </v-avatar>
+            </template>
         </v-data-table>
     </v-card>
 </template>
@@ -310,12 +369,16 @@ const headers = [
     {
         title: "DSGVO Unterschrift",
         key: "dsgvo_signature",
-        value: (item) => toAbgegeben(item.dsgvo_signature),
+        // value: (item) => toAbgegeben(item.dsgvo_signature),
     },
     {
-        title: "Poliz. Führungszeugnis",
+        title: "Erweitertes Führungszeugnis",
         key: "police_certificate",
-        value: (item) => toAbgegeben(item.police_certificate),
+        // value: (item) => toAbgegeben(item.police_certificate),
+    },
+    {
+        title: "Datum Führungszeugnis",
+        key: "polcert_date",
     },
 ];
 

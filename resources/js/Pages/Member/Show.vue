@@ -14,6 +14,16 @@
                 </v-alert>
             </div>
         </v-card-title>
+
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn variant="text" @click="closeEW">
+                {{ readonly ? "Zurück zu Aktive" : "Abbrechen" }}
+            </v-btn>
+            <v-btn variant="text" @click="saveEW" v-if="!readonly"
+                >Speichern</v-btn
+            >
+        </v-card-actions>
         <v-card-text>
             <v-container>
                 <v-row v-if="isAdmin()">
@@ -308,9 +318,47 @@
                         :items="abgegeben"
                         item-title="title"
                         item-value="value"
-                        label="Pol.Zeugnis"
+                        label="Erweitertes Führungszeugnis"
                         required
                     ></v-select>
+                    <v-row>
+                        <v-menu
+                            v-model="editWindow.showPolCertDatePicker"
+                            :close-on-content-click="false"
+                            :offset="40"
+                            transition="scale-transition"
+                            min-width="290px"
+                            :disabled="noAdminOrReadOnly"
+                        >
+                            <template v-slot:activator="{ props }">
+                                <v-text-field
+                                    v-model="editedItem.polcert_date"
+                                    label="Datum Führungszeugnis"
+                                    prepend-icon="mdi-calendar-edit"
+                                    readonly
+                                    v-bind="props"
+                                    :error="!!editedItem.errors.polcert_date"
+                                    :error-messages="
+                                        editedItem.errors.polcert_date
+                                    "
+                                ></v-text-field>
+                            </template>
+                            <v-date-picker
+                                v-model="r.polcert_date_obj"
+                                v-on:update:model-value="respToPcEv"
+                                :max="today"
+                            ></v-date-picker>
+                        </v-menu>
+                        <v-btn
+                            color="primary"
+                            variant="outlined"
+                            class="mb-2 ml-2"
+                            :disabled="readonly"
+                            @click="editedItem.polcert_date = null"
+                        >
+                            <v-icon start>mdi-delete</v-icon> Datum löschen
+                        </v-btn>
+                    </v-row>
                     <v-row>
                         <v-switch
                             class="mr-5"
@@ -417,7 +465,9 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="closeEW">Abbrechen</v-btn>
+            <v-btn variant="text" @click="closeEW">
+                {{ readonly ? "Zurück zu Aktive" : "Abbrechen" }}
+            </v-btn>
             <v-btn variant="text" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
@@ -446,7 +496,9 @@ const props = defineProps({
     // user: Object,
 });
 
-let readonly = computed(() => props.storeC.readonly1);
+let readonly = computed(() => {
+    return props.storeC.readonly1;
+});
 
 const editedItem = useForm({
     id: props.member.id ?? -1,
@@ -472,8 +524,9 @@ const editedItem = useForm({
         props.member.registered_for_first_aid_training ?? false,
     responded_to_questionaire: props.member.responded_to_questionaire ?? false,
     responded_to_questionaire_at: props.member.responded_to_questionaire_at,
-    sgvo_signature: props.member.dsgvo_signature,
+    dsgvo_signature: props.member.dsgvo_signature,
     police_certificate: props.member.police_certificate,
+    polcert_date: props.member.polcert_date,
     teams: props.member.teams ?? [],
 });
 
@@ -491,6 +544,7 @@ const r = reactive({
     latest_first_aid_training_obj: null,
     next_first_aid_training_obj: null,
     responded_to_questionaire_at_obj: null,
+    polcert_date_obj: null,
 });
 
 const editWindow = reactive({
@@ -501,6 +555,7 @@ const editWindow = reactive({
     showLatestFirstAidTrainingDatePicker: false,
     showNextFirstAidTrainingDatePicker: false,
     showQuestResponseDatePicker: false,
+    showPolCertDatePicker: false,
     teamList: {
         headers: [
             {
@@ -640,9 +695,7 @@ async function signUp() {
     }
 }
 
-const noAdminOrReadOnly = computed(() => {
-    return !isAdmin() || props.readonly;
-});
+const noAdminOrReadOnly = computed(() => !isAdmin() || readonly.value);
 
 const today = computed(() => {
     return new Date().toISOString().substring(0, 10);
@@ -751,5 +804,9 @@ function respToQuEv() {
     editedItem.responded_to_questionaire_at = fromDate(
         r.responded_to_questionaire_at_obj
     );
+}
+function respToPcEv() {
+    editWindow.showPolCertDatePicker = false;
+    editedItem.polcert_date = fromDate(r.polcert_date_obj);
 }
 </script>

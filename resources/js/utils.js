@@ -239,10 +239,20 @@ function makeSchema(members, preferredEmail) {
             width: 30,
         },
         {
-            column: "Pol.Zeugnis",
+            column: "Erweitertes Führungszeugnis",
             type: String,
             value: (member) => toAbgegeben(member.police_certificate),
             width: 30,
+        },
+        {
+            column: "Datum Führungszeugnis",
+            type: Date,
+            format: "yyyy-mm-dd",
+            value: function (member) {
+                let t = member.polcert_date;
+                return toDate(t);
+            },
+            width: 15,
         },
     ];
 

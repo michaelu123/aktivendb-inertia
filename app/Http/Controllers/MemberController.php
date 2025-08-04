@@ -83,7 +83,7 @@ class MemberController extends Controller
             ]
         );
         Member::create($all);
-        return redirect()->back()->with('success', "Neuer Mitgliedseintrag wurde erzeugt");
+        return redirect()->route("member.index")->with('success', "Neuer Mitgliedseintrag wurde erzeugt");
     }
 
     /**
@@ -222,13 +222,13 @@ class MemberController extends Controller
         $v = $request->validate([
             "first_name" => "required",
             "last_name" => "required",
-            "birthday" => "date|nullable",
+            "birthday" => "digits:4|nullable",
             'email_adfc' => 'email|nullable',
             'email_private' => 'email|nullable',
             'adfc_id' => "digits:8|nullable"
         ]);
         $member->update($all);
-        return redirect()->back()->with('success', "Mitgliedseintrag wurde geändert");
+        return redirect()->route("member.index")->with('success', "Mitgliedseintrag wurde geändert");
     }
 
     /**

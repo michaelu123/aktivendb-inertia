@@ -13,7 +13,6 @@
                 </v-alert>
             </div>
         </v-card-title>
-        <p>pc {{ r.pageCount }}</p>
         <v-data-table
             :headers="headers"
             :items="selTeams"
