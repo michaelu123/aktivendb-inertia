@@ -104,7 +104,11 @@ class MemberController extends Controller
         }
         $sess->put("store", $store);
 
-        $member->load(["teams"]);
+        $member->load([
+            "teams" => function ($query) {
+                $query->orderBy("name", "asc");
+            }
+        ]);
         foreach ($member->teams as $team) {
             $team->team_member->member_role_title = MemberRole::roleName($team->team_member->member_role_id);
         }
@@ -130,7 +134,11 @@ class MemberController extends Controller
         $sess->put("store", $store);
 
         $teamIndex = $request->query("teamIndex");
-        $member->load(["teams"]);
+        $member->load([
+            "teams" => function ($query) {
+                $query->orderBy("name", "asc");
+            }
+        ]);
         $memberTeamNames = $member->teams->map(fn($t) => $t->name)->toArray();
         $allTeams = Team::orderBy("name")->get()
             ->map(fn($t) => ["name" => $t->name, "id" => $t->id])
@@ -195,7 +203,11 @@ class MemberController extends Controller
             return [];
         }
         $m = Member::find($member_id);
-        $m->load(["teams"]);
+        $m->load([
+            "teams" => function ($query) {
+                $query->orderBy("name", "asc");
+            }
+        ]);
         return [
             "teams" => $m->teams->map(fn($team) => $team->name)
         ];

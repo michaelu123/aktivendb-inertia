@@ -94,7 +94,11 @@ class TeamController extends Controller
         $sess->put("store", $store);
 
         if (Gate::allows("edit-team-details", $team->id)) {
-            $team->load(["members"])->with(["member_role"]);
+            $team->load([
+                "members" => function ($query) {
+                    $query->orderBy("last_name", "asc")->orderBy("first_name", "asc");
+                }
+            ])->with(["member_role"]);
             foreach ($team->members as $member) {
                 $member->team_member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
             }
@@ -118,7 +122,11 @@ class TeamController extends Controller
         $sess->put("store", $store);
 
         $memberIndex = $request->query("memberIndex");
-        $team->load(["members"]);
+        $team->load([
+            "members" => function ($query) {
+                $query->orderBy("last_name", "asc")->orderBy("first_name", "asc");
+            }
+        ]);
         $teamMemberNames = $team->members->map(fn($m) => $m["last_name"] . ", " . $m["first_name"])->toArray();
         $allMembers = Member::orderBy("last_name")
             ->orderBy("first_name")
@@ -189,7 +197,11 @@ class TeamController extends Controller
         }
 
         $t = Team::find($team_id);
-        $t->load(["members"]);
+        $t->load([
+            "members" => function ($query) {
+                $query->orderBy("last_name", "asc")->orderBy("first_name", "asc");
+            }
+        ]);
         return [
             "members" => $t->members->map(fn($member): string => $member->last_name . ", " . $member->first_name)
         ];
