@@ -8,10 +8,7 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class MemberController extends Controller
 {
@@ -134,7 +131,11 @@ class MemberController extends Controller
 
         $teamIndex = $request->query("teamIndex");
         $member->load(["teams"]);
-        $allTeams = Team::orderBy("name")->get()->map(fn($t) => ["name" => $t->name, "id" => $t->id]);
+        $memberTeamNames = $member->teams->map(fn($t) => $t->name)->toArray();
+        $allTeams = Team::orderBy("name")->get()
+            ->map(fn($t) => ["name" => $t->name, "id" => $t->id])
+            // oh boy, this ->values() took me hours...
+            ->filter(fn($t) => !in_array($t["name"], $memberTeamNames))->values();
         $memberRoles = MemberRole::all()->map(fn($r) => ["title" => $r->title, "id" => $r->id]);
         foreach ($member->teams as $team) {
             $team->team_member->member_role_title = $team->team_member->member_role->title;
@@ -244,56 +245,28 @@ class MemberController extends Controller
         return redirect()->back()->with('success', "Mitgliedseintrag wurde gelöscht");
     }
 
+    private $tmHelper;
+    public function __construct()
+    {
+        $this->tmHelper = new TeamMemberHelper(
+            "Neuer AG/OG-Eintrag wurde erzeugt",
+            "AG/OG-Eintrag wurde geändert",
+            "AG/OG-Eintrag wurde gelöscht"
+        );
+    }
+
     public function updateTM(Request $request)
     {
-        $v = $request->validate([
-            "id" => "required",
-            "team_id" => "required",
-            "member_id" => "required",
-            "member_role_id" => "required|min:1|max:3",
-            "admin_comments" => "nullable",
-        ]);
-        $tmid = $v["id"];
-        $tm = TeamMember::find($tmid);
-        $teamId = $v["team_id"];
-        if (!Gate::allows("edit-team-details", $teamId)) {
-            abort(403);
-        }
-        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
-        unset($v["team_id"]);
-        $tm->update($v);
-        return redirect()
-            ->route("member.show", ["member" => $v["member_id"]])
-            ->with('success', "AG/OG-Eintrag wurde geändert");
+        return $this->tmHelper->updateTM($request);
     }
+
     public function storeTM(Request $request)
     {
-        $v = $request->validate([
-            "team_id" => "required",
-            "member_id" => "required",
-            "member_role_id" => "required|min:1|max:3",
-            "admin_comments" => "nullable",
-        ]);
-        $teamId = $v["team_id"];
-        if (!Gate::allows("edit-team-details", $teamId)) {
-            abort(403);
-        }
-        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
-        unset($v["team_id"]);
-        TeamMember::create($v);
-        $member = Member::find($v["member_id"]);
-        return redirect()->route("member.show", ["member" => $v["member_id"]])->with('success', "Neuer AG/OG-Eintrag wurde erzeugt");
+        return $this->tmHelper->storeTM($request);
     }
 
     public function destroyTM(Request $request, int $id)
     {
-        // TODO check rights
-        $tm = TeamMember::find($id);
-        if (!Gate::allows("edit-team-details", $tm->project_team_id)) {
-            abort(403);
-        }
-        $tm->delete();
-        return redirect()->back()->with('success', "AG/OG-Eintrag wurde gelöscht");
+        return $this->tmHelper->destroyTM($request, $id);
     }
-
 }

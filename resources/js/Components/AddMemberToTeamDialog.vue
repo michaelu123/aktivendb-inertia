@@ -115,9 +115,15 @@ watch(props.editWindow.memberList, () => {
     mtForm.member_id =
         props.editWindow.memberList.editedTeamMember.team_member.member_id ??
         -1;
+    // sometimes team_id, sometimes project_team_id ...
     mtForm.team_id =
         props.editWindow.memberList.editedTeamMember.team_member
-            .project_team_id ?? -1; // !!
+            .project_team_id ?? -1;
+    if (mtForm.team_id == -1) {
+        mtForm.team_id =
+            props.editWindow.memberList.editedTeamMember.team_member.team_id ??
+            -1;
+    }
     mtForm.admin_comments =
         props.editWindow.memberList.editedTeamMember.team_member
             .admin_comments ?? "";

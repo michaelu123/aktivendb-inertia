@@ -98,8 +98,6 @@ class TeamController extends Controller
             foreach ($team->members as $member) {
                 $member->team_member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
             }
-        } else {
-            $team->members = [];
         }
         return inertia(
             'Team/Show',
@@ -121,7 +119,13 @@ class TeamController extends Controller
 
         $memberIndex = $request->query("memberIndex");
         $team->load(["members"]);
-        $allMembers = Member::orderBy("last_name")->orderBy("first_name")->get()->map(fn($m) => ["name" => $m->last_name . ", " . $m->first_name, "id" => $m->id]);
+        $teamMemberNames = $team->members->map(fn($m) => $m["last_name"] . ", " . $m["first_name"])->toArray();
+        $allMembers = Member::orderBy("last_name")
+            ->orderBy("first_name")
+            ->get()
+            ->map(fn($m) => ["name" => $m["last_name"] . ", " . $m["first_name"], "id" => $m->id])
+            // oh boy, this ->values() took me hours...
+            ->filter(fn($m) => !in_array($m["name"], $teamMemberNames))->values();
         $memberRoles = MemberRole::all()->map(fn($r) => ["title" => $r->title, "id" => $r->id]);
         foreach ($team->members as $member) {
             $member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
@@ -229,44 +233,29 @@ class TeamController extends Controller
         }
     }
 
+    private $tmHelper;
+    public function __construct()
+    {
+        $this->tmHelper = new TeamMemberHelper(
+            "Mitgliedseintrag wurde AG/OG hinzugefügt",
+            "Mitgliedseintrag in AG/OG wurde geändert",
+            "Mitgliedseintrag wurde aus AG/OG gelöscht"
+        );
+    }
+
     public function updateTM(Request $request)
     {
-        $v = $request->validate([
-            "id" => "required",
-            "team_id" => "required",
-            "member_id" => "required",
-            "member_role_id" => "required|min:1|max:3",
-            "admin_comments" => "nullable",
-        ]);
-        $tmid = $v["id"];
-        $tm = TeamMember::find($tmid);
-        $teamId = $v["team_id"];
-        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
-        unset($v["team_id"]);
-        $tm->update($v);
-        return redirect()->route("team.show", ["team" => $teamId])->with('success', "Mitgliedseintrag in AG/OG wurde geändert");
+        return $this->tmHelper->updateTM($request);
     }
+
     public function storeTM(Request $request)
     {
-        $v = $request->validate([
-            "team_id" => "required",
-            "member_id" => "required",
-            "member_role_id" => "required|min:1|max:3",
-            "admin_comments" => "nullable",
-        ]);
-        $teamId = $v["team_id"];
-        $v["project_team_id"] = $teamId;  // Is there a better way for column rename?
-        unset($v["team_id"]);
-        TeamMember::create($v);
-        return redirect()->route("team.show", ["team" => $teamId])->with('success', "Mitgliedseintrag wurde AG/OG hinzugefügt");
+        return $this->tmHelper->storeTM($request);
     }
 
     public function destroyTM(Request $request, int $id)
     {
-        // TODO check rights
-        $tm = TeamMember::find($id);
-        $tm->delete();
-        return redirect()->back()->with('success', "Mitgliedseintrag wurde aus AG/OG gelöscht");
+        return $this->tmHelper->destroyTM($request, $id);
     }
 
 }
