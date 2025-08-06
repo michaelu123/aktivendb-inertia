@@ -15,6 +15,7 @@ Route::post('login', [AuthController::class, 'store'])->name("login.store");
 Route::put('login/chgpwd', [AuthController::class, 'update'])->name("login.chgpwd");
 Route::delete("login", [AuthController::class, 'create']);
 Route::get('logout', [AuthController::class, 'destroy'])->name("logout");
+Route::post('adduser', [AuthController::class, 'addUser'])->name("login.adduser");
 
 Route::post('member/storetm', [MemberController::class, 'storeTM'])->middleware("auth")->name("member.storetm");
 Route::put('member/updatetm', [MemberController::class, 'updateTM'])->middleware("auth")->name("member.updatetm");

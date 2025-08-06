@@ -669,30 +669,7 @@ async function signUp() {
         email: email,
         password: r.dbpasswd,
     };
-
-    try {
-        await $http.post(
-            "/api/user?token=" + sessionStorage.getItem("token"),
-            newUser
-        );
-        closeEditWindow();
-        showAlert("success", "Neuer Benutzer wurde gespeichert");
-        r.dbpasswd = "";
-    } catch (error) {
-        try {
-            await $http.put(
-                "/api/user/" +
-                    editedItem.user.id +
-                    "?token=" +
-                    sessionStorage.getItem("token"),
-                newUser
-            );
-            showAlert("success", "Benutzer-Passwort wurde geändert");
-        } catch (error) {
-            closeEditWindow();
-            handleRequestError(error, editWindow);
-        }
-    }
+    router.post(route("login.adduser", newUser));
 }
 
 const noAdminOrReadOnly = computed(() => !isAdmin() || readonly.value);

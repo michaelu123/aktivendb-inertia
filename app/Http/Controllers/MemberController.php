@@ -241,7 +241,7 @@ class MemberController extends Controller
             'adfc_id' => "digits:8|nullable"
         ]);
         $member->update($all);
-        return redirect()->route("member.index")->with('success', "Mitgliedseintrag wurde geändert");
+        return redirect()->back()->with('success', "Mitgliedseintrag wurde geändert");
     }
 
     /**

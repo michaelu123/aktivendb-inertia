@@ -59,4 +59,23 @@ class AuthController extends Controller
         Auth::user()->update(["password" => $req["newpwd"]]);
         return redirect()->route("home")->with('success', 'Passwort geändert!');
     }
+
+    public function addUser(Request $request)
+    {
+        $v = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:8',
+            'member_id' => 'required|min:0',
+        ]);
+        $users = User::where("email", $v["email"])->get();
+        if ($users->count() > 0) {
+            $user = $users[0];
+            $user->update(['password' => $v['password']]);
+            return redirect()->route('member.index')
+                ->with('success', 'Passwort geändert!');
+        }
+        $user = User::create($v);
+        return redirect()->route('member.index')
+            ->with('success', 'Account created!');
+    }
 }
