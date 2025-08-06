@@ -16,10 +16,10 @@
         </v-card-title>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="closeEW">
+            <v-btn variant="outlined" @click="closeEW">
                 {{ readonly ? "Zurück zu AG's/OG'S" : "Abbrechen" }}
             </v-btn>
-            <v-btn variant="text" @click="saveEW" v-if="!readonly"
+            <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
         </v-card-actions>
@@ -208,10 +208,10 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="closeEW">
+            <v-btn variant="outlined" @click="closeEW">
                 {{ readonly ? "Zurück zu AG's/OG'S" : "Abbrechen" }}
             </v-btn>
-            <v-btn variant="text" @click="saveEW" v-if="!readonly"
+            <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
         </v-card-actions>

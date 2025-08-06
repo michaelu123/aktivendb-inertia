@@ -17,10 +17,10 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="closeEW">
+            <v-btn @click="closeEW" variant="outlined">
                 {{ readonly ? "Zurück zu Aktive" : "Abbrechen" }}
             </v-btn>
-            <v-btn variant="text" @click="saveEW" v-if="!readonly"
+            <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
         </v-card-actions>
@@ -407,6 +407,9 @@
                         ></v-switch>
                     </v-row>
                 </v-form>
+                <v-card-title>
+                    <span class="text-h5">Liste der AG's/OG's</span>
+                </v-card-title>
                 <v-btn
                     color="primary"
                     variant="outlined"
@@ -465,10 +468,10 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="closeEW">
+            <v-btn variant="outlined" @click="closeEW">
                 {{ readonly ? "Zurück zu Aktive" : "Abbrechen" }}
             </v-btn>
-            <v-btn variant="text" @click="saveEW" v-if="!readonly"
+            <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
         </v-card-actions>

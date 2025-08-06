@@ -158,7 +158,7 @@
                 <v-avatar
                     color="red"
                     size="24"
-                    v-if="!checkForTrue(item.active)"
+                    v-if="checkForFalse(item.active)"
                 >
                     <v-icon size="small" class="text-white">
                         mdi-checkbox-blank-circle-outline
@@ -178,7 +178,7 @@
                 <v-avatar
                     color="red"
                     size="24"
-                    v-if="!checkForTrue(item.registered_for_first_aid_training)"
+                    v-if="checkForFalse(item.registered_for_first_aid_training)"
                 >
                     <v-icon size="small" class="text-white">
                         mdi-checkbox-blank-circle-outline
@@ -198,7 +198,7 @@
                 <v-avatar
                     color="red"
                     size="24"
-                    v-if="!checkForTrue(item.responded_to_questionaire)"
+                    v-if="checkForFalse(item.responded_to_questionaire)"
                 >
                     <v-icon size="small" class="text-white">
                         mdi-checkbox-blank-circle-outline
@@ -270,7 +270,7 @@
 
 <script setup>
 import HistoryDialog from "@/Components/HistoryDialog.vue";
-import { toAbgegeben, checkForTrue, makeSchema } from "@/utils";
+import { toAbgegeben, checkForTrue, checkForFalse, makeSchema } from "@/utils";
 import { reactive } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";

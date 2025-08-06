@@ -61,9 +61,15 @@ function toAbgegeben(v) {
 function checkForTrue(val) {
     if (val === true || val == "1" || val == 1) {
         return true;
-    } else {
-        return false;
     }
+    return false;
+}
+
+function checkForFalse(val) {
+    if (val === false || val == "0" || val == 0) {
+        return true;
+    }
+    return false;
 }
 
 function makeSchema(members, preferredEmail) {
@@ -267,4 +273,12 @@ function makeSchema(members, preferredEmail) {
     return schema;
 }
 
-export { parse, toDate, fromDate, toAbgegeben, checkForTrue, makeSchema };
+export {
+    parse,
+    toDate,
+    fromDate,
+    toAbgegeben,
+    checkForTrue,
+    checkForFalse,
+    makeSchema,
+};
