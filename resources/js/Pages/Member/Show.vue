@@ -17,12 +17,12 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="closeEW" variant="outlined">
-                {{ readonly ? "Zurück zu Aktive" : "Abbrechen" }}
-            </v-btn>
             <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
+            <v-btn variant="outlined" @click="closeEW">
+                {{ readonly ? "Zurück zu Aktive" : "Nicht speichern" }}
+            </v-btn>
         </v-card-actions>
         <v-card-text>
             <v-container>
@@ -468,12 +468,12 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="outlined" @click="closeEW">
-                {{ readonly ? "Zurück zu Aktive" : "Abbrechen" }}
-            </v-btn>
             <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
+            <v-btn variant="outlined" @click="closeEW">
+                {{ readonly ? "Zurück zu Aktive" : "Nicht speichern" }}
+            </v-btn>
         </v-card-actions>
     </v-card>
 </template>

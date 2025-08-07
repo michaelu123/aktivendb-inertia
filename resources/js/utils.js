@@ -76,7 +76,7 @@ function makeSchema(members, preferredEmail) {
     let ags = new Set();
     if (members != null) {
         for (let m of members) {
-            for (let ag of m.ags) {
+            for (let ag of m.ags ?? []) {
                 ags.add(ag);
             }
         }

@@ -146,123 +146,19 @@
                 >
             </template>
             <template v-slot:item.active="{ item }">
-                <v-avatar
-                    color="green"
-                    size="24"
-                    v-if="checkForTrue(item.active)"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-marked-circle-outline
-                    </v-icon>
-                </v-avatar>
-                <v-avatar
-                    color="red"
-                    size="24"
-                    v-if="checkForFalse(item.active)"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-blank-circle-outline
-                    </v-icon>
-                </v-avatar>
+                <CircleTF :value="item.active" />
             </template>
             <template v-slot:item.registered_for_first_aid_training="{ item }">
-                <v-avatar
-                    color="green"
-                    size="24"
-                    v-if="checkForTrue(item.registered_for_first_aid_training)"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-marked-circle-outline
-                    </v-icon>
-                </v-avatar>
-                <v-avatar
-                    color="red"
-                    size="24"
-                    v-if="checkForFalse(item.registered_for_first_aid_training)"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-blank-circle-outline
-                    </v-icon>
-                </v-avatar>
+                <CircleTF :value="item.registered_for_first_aid_training" />
             </template>
             <template v-slot:item.responded_to_questionaire="{ item }">
-                <v-avatar
-                    color="green"
-                    size="24"
-                    v-if="checkForTrue(item.responded_to_questionaire)"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-marked-circle-outline
-                    </v-icon>
-                </v-avatar>
-                <v-avatar
-                    color="red"
-                    size="24"
-                    v-if="checkForFalse(item.responded_to_questionaire)"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-blank-circle-outline
-                    </v-icon>
-                </v-avatar>
+                <CircleTF :value="item.responded_to_questionaire" />
             </template>
             <template v-slot:item.dsgvo_signature="{ item }">
-                <v-avatar
-                    color="grey"
-                    size="24"
-                    v-if="item.dsgvo_signature == 0"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-blank-circle
-                    </v-icon>
-                </v-avatar>
-                <v-avatar
-                    color="green"
-                    size="24"
-                    v-if="item.dsgvo_signature == 1"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-marked-circle-outline
-                    </v-icon>
-                </v-avatar>
-                <v-avatar
-                    color="red"
-                    size="24"
-                    v-if="item.dsgvo_signature == 2"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-blank-circle-outline
-                    </v-icon>
-                </v-avatar>
+                <Circle012 :value="item.dsgvo_signature" />
             </template>
             <template v-slot:item.police_certificate="{ item }">
-                <v-avatar
-                    color="grey"
-                    size="24"
-                    v-if="item.police_certificate == 0"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-blank-circle
-                    </v-icon>
-                </v-avatar>
-                <v-avatar
-                    color="green"
-                    size="24"
-                    v-if="item.police_certificate == 1"
-                    toabge
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-marked-circle-outline
-                    </v-icon>
-                </v-avatar>
-                <v-avatar
-                    color="red"
-                    size="24"
-                    v-if="item.police_certificate == 2"
-                >
-                    <v-icon size="small" class="text-white">
-                        mdi-checkbox-blank-circle-outline
-                    </v-icon>
-                </v-avatar>
+                <Circle012 :value="item.police_certificate" />
             </template>
         </v-data-table>
     </v-card>
@@ -270,7 +166,9 @@
 
 <script setup>
 import HistoryDialog from "@/Components/HistoryDialog.vue";
-import { toAbgegeben, checkForTrue, checkForFalse, makeSchema } from "@/utils";
+import Circle012 from "@/Components/Circle012.vue";
+import CircleTF from "@/Components/CircleTF.vue";
+import { makeSchema } from "@/utils";
 import { reactive } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";

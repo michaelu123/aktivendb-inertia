@@ -16,12 +16,12 @@
         </v-card-title>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="outlined" @click="closeEW">
-                {{ readonly ? "Zurück zu AG's/OG'S" : "Abbrechen" }}
-            </v-btn>
             <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
+            <v-btn variant="outlined" @click="closeEW">
+                {{ readonly ? "Zurück zu AG's/OG'S" : "Nicht speichern" }}
+            </v-btn>
         </v-card-actions>
 
         <v-sheet color="grey-lighten-3" align="center" v-if="editedItem.id > 0">
@@ -201,6 +201,21 @@
                                 mdi-delete
                             </v-icon>
                         </template>
+                        <template
+                            v-slot:item.registered_for_first_aid_training="{
+                                item,
+                            }"
+                        >
+                            <CircleTF
+                                :value="item.registered_for_first_aid_training"
+                            />
+                        </template>
+                        <template v-slot:item.dsgvo_signature="{ item }">
+                            <Circle012 :value="item.dsgvo_signature" />
+                        </template>
+                        <template v-slot:item.police_certificate="{ item }">
+                            <Circle012 :value="item.police_certificate" />
+                        </template>
                     </v-data-table>
                 </template>
             </v-container>
@@ -208,12 +223,12 @@
 
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn variant="outlined" @click="closeEW">
-                {{ readonly ? "Zurück zu AG's/OG'S" : "Abbrechen" }}
-            </v-btn>
             <v-btn variant="outlined" @click="saveEW" v-if="!readonly"
                 >Speichern</v-btn
             >
+            <v-btn variant="outlined" @click="closeEW">
+                {{ readonly ? "Zurück zu AG's/OG'S" : "Nicht speichern" }}
+            </v-btn>
         </v-card-actions>
     </v-card>
 </template>
@@ -221,9 +236,11 @@
 <script setup>
 import { computed, onMounted, reactive } from "vue";
 import { usePage, router, useForm } from "@inertiajs/vue3";
-import { checkForTrue, fromDate, toAbgegeben, makeSchema } from "@/utils";
+import { checkForTrue, makeSchema } from "@/utils";
 
 import AddMemberToTeamDialog from "@/Components/AddMemberToTeamDialog.vue";
+import Circle012 from "@/Components/Circle012.vue";
+import CircleTF from "@/Components/CircleTF.vue";
 import { route } from "ziggy";
 
 import writeXlsxFile from "write-excel-file";
@@ -280,6 +297,26 @@ const editWindow = reactive({
             {
                 title: "Funktion",
                 key: "team_member.member_role_title",
+            },
+            {
+                title: "Letzte 1. Hilfe Schulung",
+                key: "latest_first_aid_training",
+            },
+            {
+                title: "Registriert für Schulung",
+                key: "registered_for_first_aid_training",
+            },
+            {
+                title: "DSGVO Unterschrift",
+                key: "dsgvo_signature",
+            },
+            {
+                title: "Erweitertes Führungszeugnis",
+                key: "police_certificate",
+            },
+            {
+                title: "Datum Führungszeugnis",
+                key: "polcert_date",
             },
         ],
         editedTeamMemberIndex: -1,
@@ -421,9 +458,9 @@ async function exportExcel() {
         return;
     }
 
-    const schema = makeSchema(me, null);
+    const schema = makeSchema(props.team.members, r.preferredEmail);
 
-    await writeXlsxFile(members, {
+    await writeXlsxFile(props.team.members, {
         schema,
         fileName: r.excelFileName,
     });
