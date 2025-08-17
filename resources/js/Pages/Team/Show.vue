@@ -113,7 +113,7 @@
                         :error="!!editedItem.errors.comments"
                         :error-messages="editedItem.errors.comments"
                     ></v-textarea>
-                    <v-switch
+                    <!-- <v-switch
                         v-model="editedItem.needs_first_aid_training"
                         color="green"
                         :base-color="
@@ -128,7 +128,7 @@
                         :error-messages="
                             editedItem.errors.needs_first_aid_training
                         "
-                    ></v-switch>
+                    ></v-switch> -->
                 </v-form>
                 <v-card-title>
                     <span class="text-h5">Liste der Mitglieder</span>
@@ -201,7 +201,10 @@
                                 mdi-delete
                             </v-icon>
                         </template>
-                        <template
+                        <template v-slot:item.active="{ item }">
+                            <CircleTF :value="item.active" />
+                        </template>
+                        <!-- <template
                             v-slot:item.registered_for_first_aid_training="{
                                 item,
                             }"
@@ -209,7 +212,7 @@
                             <CircleTF
                                 :value="item.registered_for_first_aid_training"
                             />
-                        </template>
+                        </template> -->
                         <template v-slot:item.dsgvo_signature="{ item }">
                             <Circle012 :value="item.dsgvo_signature" />
                         </template>
@@ -277,6 +280,7 @@ const r = reactive({
     searchEditWindow: "",
     excelFileName: "",
     preferredEmail: "Bevorzugte Email-Adresse",
+    activeSwitch: true,
 });
 
 const editWindow = reactive({
@@ -291,6 +295,14 @@ const editWindow = reactive({
                 sortable: false,
             },
             {
+                title: "Aktiv",
+                key: "active",
+                filter: (value, _se, item) => {
+                    if (!r.activeSwitch) return true;
+                    return !!value;
+                },
+            },
+            {
                 title: "Aktive(r)",
                 key: "name",
             },
@@ -303,9 +315,13 @@ const editWindow = reactive({
                 key: "latest_first_aid_training",
             },
             {
-                title: "Registriert für Schulung",
-                key: "registered_for_first_aid_training",
+                title: "Nächste 1. Hilfe Schulung",
+                key: "next_first_aid_training",
             },
+            // {
+            //     title: "Registriert für Schulung",
+            //     key: "registered_for_first_aid_training",
+            // },
             {
                 title: "DSGVO Unterschrift",
                 key: "dsgvo_signature",

@@ -148,9 +148,9 @@
             <template v-slot:item.active="{ item }">
                 <CircleTF :value="item.active" />
             </template>
-            <template v-slot:item.registered_for_first_aid_training="{ item }">
+            <!-- <template v-slot:item.registered_for_first_aid_training="{ item }">
                 <CircleTF :value="item.registered_for_first_aid_training" />
-            </template>
+            </template> -->
             <template v-slot:item.responded_to_questionaire="{ item }">
                 <CircleTF :value="item.responded_to_questionaire" />
             </template>
@@ -234,7 +234,7 @@ const headers = [
     },
     {
         title: "Telefon",
-        key: "phone",
+        key: "phone_primary",
     },
     // {
     //   title: "Letzter Kontakt",
@@ -248,10 +248,10 @@ const headers = [
         title: "Letzte 1. Hilfe Schulung",
         key: "latest_first_aid_training",
     },
-    {
-        title: "Registriert für Schulung",
-        key: "registered_for_first_aid_training",
-    },
+    // {
+    //     title: "Registriert für Schulung",
+    //     key: "registered_for_first_aid_training",
+    // },
     {
         title: "Nächste 1. Hilfe Schulung",
         key: "next_first_aid_training",

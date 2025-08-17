@@ -145,12 +145,12 @@ const headers = [
         sortable: false,
     },
     {
-        title: "Aktive(r)",
+        title: "Name",
         key: "name",
     },
     {
-        title: "Funktion",
-        key: "project_team_member.member_role_title",
+        title: "E-Mail",
+        key: "email",
     },
 ];
 

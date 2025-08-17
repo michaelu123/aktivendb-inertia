@@ -200,7 +200,7 @@
                         :offset="40"
                         transition="scale-transition"
                         min-width="290px"
-                        :disabled="readonly"
+                        :disabled="noAdminOrReadOnly"
                     >
                         <template v-slot:activator="{ props }">
                             <v-text-field
@@ -233,7 +233,7 @@
                             :offset="40"
                             transition="scale-transition"
                             min-width="290px"
-                            :disabled="readonly"
+                            :disabled="noAdminOrReadOnly"
                         >
                             <template v-slot:activator="{ props }">
                                 <v-text-field
@@ -262,7 +262,7 @@
                             color="primary"
                             variant="outlined"
                             class="mb-2 ml-2"
-                            :disabled="readonly"
+                            :disabled="noAdminOrReadOnly"
                             @click="editedItem.next_first_aid_training = null"
                         >
                             <v-icon start>mdi-delete</v-icon> Datum löschen
@@ -353,7 +353,7 @@
                             color="primary"
                             variant="outlined"
                             class="mb-2 ml-2"
-                            :disabled="readonly"
+                            :disabled="noAdminOrReadOnly"
                             @click="editedItem.polcert_date = null"
                         >
                             <v-icon start>mdi-delete</v-icon> Datum löschen
@@ -371,7 +371,7 @@
                             :error="!!editedItem.errors.active"
                             :error-messages="editedItem.errors.active"
                         ></v-switch>
-                        <v-switch
+                        <!-- <v-switch
                             class="ml-5"
                             v-model="
                                 editedItem.registered_for_first_aid_training
@@ -388,7 +388,7 @@
                             @update:model-value="registerFirstAid"
                             :error="!!editedItem.errors.active"
                             :error-messages="editedItem.errors.active"
-                        ></v-switch>
+                        ></v-switch> -->
                         <v-switch
                             class="ml-5"
                             v-model="editedItem.responded_to_questionaire"
@@ -523,8 +523,8 @@ const editedItem = useForm({
     interests: props.member.interests ?? "",
     latest_contact: props.member.latest_contact,
     active: props.member.active ?? true,
-    registered_for_first_aid_training:
-        props.member.registered_for_first_aid_training ?? false,
+    // registered_for_first_aid_training:
+    //     props.member.registered_for_first_aid_training ?? false,
     responded_to_questionaire: props.member.responded_to_questionaire ?? false,
     responded_to_questionaire_at: props.member.responded_to_questionaire_at,
     dsgvo_signature: props.member.dsgvo_signature,
