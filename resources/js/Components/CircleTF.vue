@@ -13,5 +13,5 @@
 
 <script setup>
 const props = defineProps(["value"]);
-import { checkForTrue, checkForFalse, makeSchema } from "@/utils";
+import { checkForTrue, checkForFalse } from "@/utils";
 </script>

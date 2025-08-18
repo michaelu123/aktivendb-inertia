@@ -121,33 +121,14 @@
                         :error="!!editedItem.errors.phone_secondary"
                         :error-messages="editedItem.errors.phone_secondary"
                     ></v-text-field>
-                    <v-menu
-                        v-model="editWindow.showLatestContactDatePicker"
-                        :close-on-content-click="false"
-                        :offset="40"
-                        transition="scale-transition"
-                        min-width="290px"
+                    <DatePicker
                         :disabled="readonly"
-                    >
-                        <template v-slot:activator="{ props }">
-                            <v-text-field
-                                v-model="editedItem.latest_contact"
-                                label="Letzter Kontakt"
-                                prepend-icon="mdi-calendar-edit"
-                                readonly
-                                v-bind="props"
-                                :error="!!editedItem.errors.latest_contact"
-                                :error-messages="
-                                    editedItem.errors.latest_contact
-                                "
-                            ></v-text-field>
-                        </template>
-                        <v-date-picker
-                            v-model="r.latest_contact_obj"
-                            v-on:update:model-value="lastContactEv"
-                            :max="today"
-                        ></v-date-picker>
-                    </v-menu>
+                        v-model:date_txt="editedItem.latest_contact"
+                        :error="!!editedItem.errors.latest_contact"
+                        :error_txt="editedItem.errors.latest_contact"
+                        label="Letzter Kontakt"
+                        :maxDate="today"
+                    />
                     <v-textarea
                         v-model="editedItem.status"
                         label="Status"
@@ -192,115 +173,37 @@
                         :error="!!editedItem.errors.interests"
                         :error-messages="editedItem.errors.interests"
                     ></v-textarea>
-                    <v-menu
-                        v-model="
-                            editWindow.showLatestFirstAidTrainingDatePicker
+                    <DatePicker
+                        :disabled="noAdminOrReadOnly"
+                        v-model:date_txt="editedItem.latest_first_aid_training"
+                        :error="!!editedItem.errors.latest_first_aid_training"
+                        :error_txt="editedItem.errors.latest_first_aid_training"
+                        label="Letzte 1. Hilfe Schulung"
+                        :maxDate="today"
+                    />
+                    <DatePicker
+                        :disabled="noAdminOrReadOnly"
+                        v-model:date_txt="editedItem.next_first_aid_training"
+                        :error="!!editedItem.errors.next_first_aid_training"
+                        :error_txt="editedItem.errors.next_first_aid_training"
+                        label="Nächste 1. Hilfe Schulung"
+                        :minDate="today"
+                    />
+                    <DatePicker
+                        :disabled="noAdminOrReadOnly"
+                        v-model:date_txt="
+                            editedItem.responded_to_questionaire_at
                         "
-                        :close-on-content-click="false"
-                        :offset="40"
-                        transition="scale-transition"
-                        min-width="290px"
-                        :disabled="noAdminOrReadOnly"
-                    >
-                        <template v-slot:activator="{ props }">
-                            <v-text-field
-                                v-model="editedItem.latest_first_aid_training"
-                                label="Letzte 1. Hilfe Schulung"
-                                prepend-icon="mdi-calendar-edit"
-                                readonly
-                                v-bind="props"
-                                :error="
-                                    !!editedItem.errors
-                                        .latest_first_aid_training
-                                "
-                                :error-messages="
-                                    editedItem.errors.latest_first_aid_training
-                                "
-                            ></v-text-field>
-                        </template>
-                        <v-date-picker
-                            v-model="r.latest_first_aid_training_obj"
-                            v-on:update:model-value="lastEhkEv"
-                            :max="today"
-                        ></v-date-picker>
-                    </v-menu>
-                    <v-row>
-                        <v-menu
-                            v-model="
-                                editWindow.showNextFirstAidTrainingDatePicker
-                            "
-                            :close-on-content-click="false"
-                            :offset="40"
-                            transition="scale-transition"
-                            min-width="290px"
-                            :disabled="noAdminOrReadOnly"
-                        >
-                            <template v-slot:activator="{ props }">
-                                <v-text-field
-                                    v-model="editedItem.next_first_aid_training"
-                                    label="Nächste 1. Hilfe Schulung"
-                                    prepend-icon="mdi-calendar-edit"
-                                    readonly
-                                    v-bind="props"
-                                    :error="
-                                        !!editedItem.errors
-                                            .next_first_aid_training
-                                    "
-                                    :error-messages="
-                                        editedItem.errors
-                                            .next_first_aid_training
-                                    "
-                                ></v-text-field>
-                            </template>
-                            <v-date-picker
-                                v-model="r.next_first_aid_training_obj"
-                                v-on:update:model-value="nextEhkEv"
-                                :min="today"
-                            ></v-date-picker>
-                        </v-menu>
-                        <v-btn
-                            color="primary"
-                            variant="outlined"
-                            class="mb-2 ml-2"
-                            :disabled="noAdminOrReadOnly"
-                            @click="editedItem.next_first_aid_training = null"
-                        >
-                            <v-icon start>mdi-delete</v-icon> Datum löschen
-                        </v-btn>
-                    </v-row>
-                    <v-menu
-                        v-model="editWindow.showQuestResponseDatePicker"
-                        :close-on-content-click="false"
-                        :offset="40"
-                        transition="scale-transition"
-                        min-width="290px"
-                        :disabled="noAdminOrReadOnly"
-                    >
-                        <template v-slot:activator="{ props }">
-                            <v-text-field
-                                v-model="
-                                    editedItem.responded_to_questionaire_at
-                                "
-                                label="Datum Fragebogen"
-                                prepend-icon="mdi-calendar-edit"
-                                readonly
-                                v-bind="props"
-                                :error="
-                                    !!editedItem.errors
-                                        .responded_to_questionaire_at
-                                "
-                                :error-messages="
-                                    editedItem.errors
-                                        .responded_to_questionaire_at
-                                "
-                            ></v-text-field>
-                        </template>
-                        <v-date-picker
-                            v-model="r.responded_to_questionaire_at_obj"
-                            v-on:update:model-value="respToQuEv"
-                            :max="today"
-                        ></v-date-picker>
-                    </v-menu>
+                        :error="
+                            !!editedItem.errors.responded_to_questionaire_at
+                        "
+                        :error_txt="
+                            editedItem.errors
+                                .next_first_airesponded_to_questionaire_atd_training
+                        "
+                        label="Datum Fragebogen"
+                        :maxDate="today"
+                    />
                     <v-select
                         clearable
                         v-model="editedItem.dsgvo_signature"
@@ -321,44 +224,17 @@
                         label="Erweitertes Führungszeugnis"
                         required
                     ></v-select>
-                    <v-row>
-                        <v-menu
-                            v-model="editWindow.showPolCertDatePicker"
-                            :close-on-content-click="false"
-                            :offset="40"
-                            transition="scale-transition"
-                            min-width="290px"
-                            :disabled="noAdminOrReadOnly"
-                        >
-                            <template v-slot:activator="{ props }">
-                                <v-text-field
-                                    v-model="editedItem.polcert_date"
-                                    label="Datum Führungszeugnis"
-                                    prepend-icon="mdi-calendar-edit"
-                                    readonly
-                                    v-bind="props"
-                                    :error="!!editedItem.errors.polcert_date"
-                                    :error-messages="
-                                        editedItem.errors.polcert_date
-                                    "
-                                ></v-text-field>
-                            </template>
-                            <v-date-picker
-                                v-model="r.polcert_date_obj"
-                                v-on:update:model-value="respToPcEv"
-                                :max="today"
-                            ></v-date-picker>
-                        </v-menu>
-                        <v-btn
-                            color="primary"
-                            variant="outlined"
-                            class="mb-2 ml-2"
-                            :disabled="noAdminOrReadOnly"
-                            @click="editedItem.polcert_date = null"
-                        >
-                            <v-icon start>mdi-delete</v-icon> Datum löschen
-                        </v-btn>
-                    </v-row>
+                    <DatePicker
+                        :disabled="noAdminOrReadOnly"
+                        v-model:date_txt="editedItem.polcert_date"
+                        :error="
+                            !!editedItem.errors
+                                .responded_to_questpolcert_dateionaire_at
+                        "
+                        :error_txt="editedItem.errors.polcert_date"
+                        label="Datum Führungszeugnis"
+                        :maxDate="today"
+                    />
                     <v-row>
                         <v-switch
                             class="mr-5"
@@ -371,24 +247,6 @@
                             :error="!!editedItem.errors.active"
                             :error-messages="editedItem.errors.active"
                         ></v-switch>
-                        <!-- <v-switch
-                            class="ml-5"
-                            v-model="
-                                editedItem.registered_for_first_aid_training
-                            "
-                            color="green"
-                            :base-color="
-                                editedItem.registered_for_first_aid_training
-                                    ? 'green'
-                                    : 'red'
-                            "
-                            label="Registriert für Erste-Hilfe-Kurs"
-                            :disabled="readonly"
-                            :value-comparator="checkForTrue"
-                            @update:model-value="registerFirstAid"
-                            :error="!!editedItem.errors.active"
-                            :error-messages="editedItem.errors.active"
-                        ></v-switch> -->
                         <v-switch
                             class="ml-5"
                             v-model="editedItem.responded_to_questionaire"
@@ -484,6 +342,7 @@ import { usePage, router, useForm } from "@inertiajs/vue3";
 import { checkForTrue, fromDate } from "@/utils";
 import AddTeamToMemberDialog from "@/Components/AddTeamToMemberDialog.vue";
 import { route } from "ziggy";
+import DatePicker from "@/Components/DatePicker.vue";
 
 const props = defineProps({
     member: Object,
@@ -523,8 +382,6 @@ const editedItem = useForm({
     interests: props.member.interests ?? "",
     latest_contact: props.member.latest_contact,
     active: props.member.active ?? true,
-    // registered_for_first_aid_training:
-    //     props.member.registered_for_first_aid_training ?? false,
     responded_to_questionaire: props.member.responded_to_questionaire ?? false,
     responded_to_questionaire_at: props.member.responded_to_questionaire_at,
     dsgvo_signature: props.member.dsgvo_signature,
@@ -554,11 +411,6 @@ const editWindow = reactive({
     shown: false,
     formValid: true,
     errors: {},
-    showLatestContactDatePicker: false,
-    showLatestFirstAidTrainingDatePicker: false,
-    showNextFirstAidTrainingDatePicker: false,
-    showQuestResponseDatePicker: false,
-    showPolCertDatePicker: false,
     teamList: {
         headers: [
             {
@@ -685,11 +537,6 @@ function isAdmin() {
     return !!page.props.user.is_admin;
 }
 
-// function nextTraining() {
-//     editWindow.showNextFirstAidTrainingDatePicker = false;
-//     editedItem.registered_for_first_aid_training = true;
-// }
-
 function registerFirstAid(e) {
     if (!e) {
         editedItem.next_first_aid_training = null;
@@ -761,32 +608,5 @@ function showAlert(type, text) {
     setTimeout(() => {
         alert.shown = false;
     }, 5000);
-}
-
-function lastContactEv() {
-    editWindow.showLatestContactDatePicker = false;
-    editedItem.latest_contact = fromDate(r.latest_contact_obj);
-}
-function lastEhkEv() {
-    editWindow.showLatestFirstAidTrainingDatePicker = false;
-    editedItem.latest_first_aid_training = fromDate(
-        r.latest_first_aid_training_obj
-    );
-}
-function nextEhkEv() {
-    editWindow.showNextFirstAidTrainingDatePicker = false;
-    editedItem.next_first_aid_training = fromDate(
-        r.next_first_aid_training_obj
-    );
-}
-function respToQuEv() {
-    editWindow.showQuestResponseDatePicker = false;
-    editedItem.responded_to_questionaire_at = fromDate(
-        r.responded_to_questionaire_at_obj
-    );
-}
-function respToPcEv() {
-    editWindow.showPolCertDatePicker = false;
-    editedItem.polcert_date = fromDate(r.polcert_date_obj);
 }
 </script>

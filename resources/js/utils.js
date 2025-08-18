@@ -210,12 +210,6 @@ function makeSchema(members, preferredEmail) {
             },
             width: 15,
         },
-        // {
-        //     column: "Registriert für Erste-Hilfe-Training",
-        //     type: Boolean,
-        //     value: (member) => member.registered_for_first_aid_training == "1",
-        //     width: 15,
-        // },
         {
             column: "Fragebogen ausgefüllt",
             type: Boolean,

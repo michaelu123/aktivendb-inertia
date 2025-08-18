@@ -204,15 +204,6 @@
                         <template v-slot:item.active="{ item }">
                             <CircleTF :value="item.active" />
                         </template>
-                        <!-- <template
-                            v-slot:item.registered_for_first_aid_training="{
-                                item,
-                            }"
-                        >
-                            <CircleTF
-                                :value="item.registered_for_first_aid_training"
-                            />
-                        </template> -->
                         <template v-slot:item.dsgvo_signature="{ item }">
                             <Circle012 :value="item.dsgvo_signature" />
                         </template>
@@ -318,10 +309,6 @@ const editWindow = reactive({
                 title: "Nächste 1. Hilfe Schulung",
                 key: "next_first_aid_training",
             },
-            // {
-            //     title: "Registriert für Schulung",
-            //     key: "registered_for_first_aid_training",
-            // },
             {
                 title: "DSGVO Unterschrift",
                 key: "dsgvo_signature",
