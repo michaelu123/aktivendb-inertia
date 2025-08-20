@@ -158,11 +158,7 @@
                 <template v-if="editedItem.id > 0">
                     <v-data-table
                         :headers="editWindow.memberList.headers"
-                        :items="
-                            r.activeSwitch
-                                ? team.members.filter((m) => !!m.active)
-                                : team.members
-                        "
+                        :items="selItems"
                         :search="r.searchEditWindow"
                         @click:row="viewTeamMemberItem"
                     >
@@ -259,6 +255,12 @@ const editedItem = useForm({
     description: props.team.description ?? "",
     comments: props.team.comments ?? "",
     members: props.team.members ?? [],
+});
+
+const selItems = computed(() => {
+    if (!props.team.members) return [];
+    if (r.activeSwitch) return props.team.members.filter((m) => !!m.active);
+    return props.team.members;
 });
 
 const alert = reactive({

@@ -64,6 +64,11 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
+        $user = $request->user();
+        if (!$user->isAdmin) {
+            abort(403);
+        }
+
         $all = $request->all();
         $v = $request->validate(
             [
@@ -122,12 +127,14 @@ class TeamController extends Controller
         $sess->put("store", $store);
 
         $memberIndex = $request->query("memberIndex");
-        $team->load([
-            "members" => function ($query) {
-                $query->orderBy("last_name", "asc")->orderBy("first_name", "asc");
-            }
-        ]);
-        $teamMemberNames = $team->members->map(fn($m) => $m["last_name"] . ", " . $m["first_name"])->toArray();
+        if (Gate::allows("edit-team-details", $team->id)) {
+            $team->load([
+                "members" => function ($query) {
+                    $query->orderBy("last_name", "asc")->orderBy("first_name", "asc");
+                }
+            ]);
+            $teamMemberNames = $team->members->map(fn($m) => $m["last_name"] . ", " . $m["first_name"])->toArray();
+        }
         $allMembers = Member::orderBy("last_name")
             ->orderBy("first_name")
             ->get()
@@ -220,12 +227,14 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
+        if (Gate::allows("edit-team-details", $team->id)) {
+            abort(403);
+        }
         $v = $request->validate([
             "name" => "required",
             "email" => "email|required",
             "description" => "nullable",
             "comments" => "nullable",
-            "needs_first_aid_training" => "nullable",
         ]);
         $team->update($v);
         return redirect()->back()->with('success', "AG/OG-Eintrag wurde geändert");

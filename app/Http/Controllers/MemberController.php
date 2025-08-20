@@ -227,7 +227,7 @@ class MemberController extends Controller
     public function update(Request $request, Member $member)
     {
         $user = $request->user();
-        if (!$user->isAdmin && $user->id != $member->id) {
+        if (!Gate::allows('see-member-details', $member->id)) {
             abort(403);
         }
 
@@ -240,6 +240,9 @@ class MemberController extends Controller
             'email_private' => 'email|nullable',
             'adfc_id' => "digits:8|nullable"
         ]);
+        if (!$user->isAdmin) {
+            $all = $this->removeFields($all);
+        }
         $member->update($all);
         return redirect()->back()->with('success', "Mitgliedseintrag wurde geändert");
     }
@@ -280,5 +283,17 @@ class MemberController extends Controller
     public function destroyTM(Request $request, int $id)
     {
         return $this->tmHelper->destroyTM($request, $id);
+    }
+
+    function removeFields(array $params): array
+    {
+        unset($params["latest_first_aid_training"]);
+        unset($params["next_first_aid_training"]);
+        unset($params["responded_to_questionaire"]);
+        unset($params["responded_to_questionaire_at"]);
+        unset($params["dsgvo_signature"]);
+        unset($params["police_certificate"]);
+        unset($params["polcert_date"]);
+        return $params;
     }
 }

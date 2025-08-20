@@ -388,12 +388,12 @@ function explainTeamMember(tm, email) {
             ": ";
         historyObj["when"] = tm.record_new.updated_at;
     }
-    r.historyTxt.push({ indent: 0, msg, lineNo });
+    historyTxt.push({ indent: 0, msg, lineNo });
     for (let u of upd) {
         lineNo++;
-        r.historyTxt.push({ indent: 1, msg: u, lineNo });
+        historyTxt.push({ indent: 1, msg: u, lineNo });
     }
-    r.historyArray.push(historyObj);
+    historyArray.push(historyObj);
 }
 
 function explainTeam(team, email) {

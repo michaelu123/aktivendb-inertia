@@ -207,7 +207,7 @@
                     <v-select
                         clearable
                         v-model="editedItem.dsgvo_signature"
-                        :readonly="readonly"
+                        :readonly="noAdminOrReadOnly"
                         :items="abgegeben"
                         item-title="title"
                         item-value="value"
@@ -217,7 +217,7 @@
                     <v-select
                         clearable
                         v-model="editedItem.police_certificate"
-                        :readonly="readonly"
+                        :readonly="noAdminOrReadOnly"
                         :items="abgegeben"
                         item-title="title"
                         item-value="value"

@@ -23,7 +23,6 @@ class Team extends Model
     'email',
     'description',
     'comments',
-    'needs_first_aid_training'
   ];
 
   protected $dates = [
