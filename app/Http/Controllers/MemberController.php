@@ -88,9 +88,9 @@ class MemberController extends Controller
      */
     public function show(Member $member, Request $request)
     {
-        if (!Gate::allows('see-member-details', $member->id)) {
-            abort(403);
-        }
+        // if (!Gate::allows('see-member-details', $member->id)) {
+        //     abort(403);
+        // }
         $sess = $request->session();
 
         $store = $sess->get("store", []);
@@ -109,9 +109,14 @@ class MemberController extends Controller
                 $query->orderBy("name", "asc");
             }
         ]);
-        foreach ($member->teams as $team) {
+        $teams = $member->teams->filter(fn($team) => Gate::allows('edit-team-details', $team->id));
+        foreach ($teams as $team) {
             $team->team_member->member_role_title = MemberRole::roleName($team->team_member->member_role_id);
         }
+        $member->setRelation(
+            'teams',
+            $teams->values(),
+        );
         return inertia(
             'Member/Show',
             [
@@ -123,9 +128,9 @@ class MemberController extends Controller
 
     public function showWithDialog(Member $member, Request $request)
     {
-        if (!Gate::allows('see-member-details', $member->id)) {
-            abort(403);
-        }
+        // if (!Gate::allows('see-member-details', $member->id)) {
+        //     abort(403);
+        // }
         $sess = $request->session();
 
         $store = $sess->get("store", []);
@@ -140,10 +145,16 @@ class MemberController extends Controller
             }
         ]);
         $memberTeamNames = $member->teams->map(fn($t) => $t->name)->toArray();
+        $user = $request->user();
         $allTeams = Team::orderBy("name")->get()
             ->map(fn($t) => ["name" => $t->name, "id" => $t->id])
-            // oh boy, this ->values() took me hours...
-            ->filter(fn($t) => !in_array($t["name"], $memberTeamNames))->values();
+            ->filter(fn($t) => !in_array($t["name"], $memberTeamNames));
+        if (!$user->isAdmin) {
+            $allTeams = $allTeams->filter(fn($t) => Gate::allows('edit-team-details', $t["id"]));
+        }
+        // oh boy, this ->values() took me hours...
+        // and in map() I can use $t->..., in filter() I must use $t["..."] ???
+        $allTeams = $allTeams->values();
         $memberRoles = MemberRole::all()->map(fn($r) => ["title" => $r->title, "id" => $r->id]);
         foreach ($member->teams as $team) {
             $team->team_member->member_role_title = $team->team_member->member_role->title;
@@ -272,12 +283,12 @@ class MemberController extends Controller
 
     public function updateTM(Request $request)
     {
-        return $this->tmHelper->updateTM($request);
+        return $this->tmHelper->updateTM($request, "member");
     }
 
     public function storeTM(Request $request)
     {
-        return $this->tmHelper->storeTM($request);
+        return $this->tmHelper->storeTM($request, "member");
     }
 
     public function destroyTM(Request $request, int $id)

@@ -19,7 +19,7 @@ class TeamMemberHelper
     $this->destroyMessage = $dmsg;
   }
 
-  public function updateTM(Request $request)
+  public function updateTM(Request $request, string $from)
   {
     $v = $request->validate([
       "id" => "required|min:0",
@@ -41,12 +41,18 @@ class TeamMemberHelper
     $v["project_team_id"] = $teamId; // Is there a better way for column rename?
     unset($v["team_id"]);
     $tm->update($v);
-    return redirect()
-      ->route("member.show", ["member" => $memberId])
-      ->with('success', $this->updateMessage);
+    if ($from == "member") {
+      return redirect()
+        ->route("member.show", ["member" => $memberId])
+        ->with('success', $this->updateMessage);
+    } else {
+      return redirect()
+        ->route("team.show", ["team" => $teamId])
+        ->with('success', $this->updateMessage);
+    }
   }
 
-  public function storeTM(Request $request)
+  public function storeTM(Request $request, string $from)
   {
     $v = $request->validate([
       "team_id" => "required|min:0",
@@ -64,8 +70,13 @@ class TeamMemberHelper
     }
     $v["project_team_id"] = $teamId; // Is there a better way for column rename?
     unset($v["team_id"]);
+    $v["admin_comments"] ??= "";
     TeamMember::create($v);
-    return redirect()->route("member.show", ["member" => $memberId])->with('success', $this->storeMessage);
+    if ($from == "member") {
+      return redirect()->route("member.show", ["member" => $memberId])->with('success', $this->storeMessage);
+    } else {
+      return redirect()->route("team.show", ["team" => $teamId])->with('success', $this->storeMessage);
+    }
   }
 
   public function destroyTM(Request $request, int $id)

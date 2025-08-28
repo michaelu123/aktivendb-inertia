@@ -273,7 +273,7 @@
                     variant="outlined"
                     class="mb-2"
                     v-bind="props"
-                    v-if="!readonly && editedItem.id > 0"
+                    v-if="editedItem.id > 0"
                     @click.prevent="addTeamToMember"
                 >
                     <v-icon start>mdi-plus</v-icon> Mitglied zu AG/OG hinzufügen

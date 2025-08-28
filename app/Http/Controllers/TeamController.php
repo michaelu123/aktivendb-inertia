@@ -266,12 +266,12 @@ class TeamController extends Controller
 
     public function updateTM(Request $request)
     {
-        return $this->tmHelper->updateTM($request);
+        return $this->tmHelper->updateTM($request, "team");
     }
 
     public function storeTM(Request $request)
     {
-        return $this->tmHelper->storeTM($request);
+        return $this->tmHelper->storeTM($request, "team");
     }
 
     public function destroyTM(Request $request, int $id)
