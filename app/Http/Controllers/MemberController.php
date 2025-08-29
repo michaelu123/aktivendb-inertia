@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Models\MemberRole;
 use App\Models\Team;
-use App\Models\TeamMember;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,20 +16,10 @@ class MemberController extends Controller
      */
     public function index(Request $request)
     {
-        $sess = $request->session();
-
-        $store = $sess->get("store", []);
-        $pageno = $request->query("pageno", null);
-        if ($pageno !== null) {
-            $store["pageno"] = $pageno;
-        }
-        $sess->put("store", $store);
-
         return inertia(
             'Member/Index',
             [
                 "members" => Member::orderBy("last_name")->orderBy("first_name")->orderBy("first_name")->get(),
-                "storeC" => $store
             ]
         );
     }
@@ -44,8 +33,6 @@ class MemberController extends Controller
         if (!$user->isAdmin) {
             abort(403);
         }
-        $sess = $request->session();
-        $store = $sess->get("store", []);
 
         $member = new Member;
         $member->id = -1;
@@ -53,7 +40,6 @@ class MemberController extends Controller
             'Member/Show',
             [
                 "member" => $member,
-                "storeC" => $store,
             ]
         );
     }
@@ -91,19 +77,6 @@ class MemberController extends Controller
         // if (!Gate::allows('see-member-details', $member->id)) {
         //     abort(403);
         // }
-        $sess = $request->session();
-
-        $store = $sess->get("store", []);
-        $readonly = $request->query("readonly", null);
-        if ($readonly !== null) {
-            $store["readonly1"] = !!$readonly;
-        }
-        $pageno = $request->query("pageno", null);
-        if ($pageno !== null) {
-            $store["pageno"] = $pageno;
-        }
-        $sess->put("store", $store);
-
         $member->load([
             "teams" => function ($query) {
                 $query->orderBy("name", "asc");
@@ -121,7 +94,6 @@ class MemberController extends Controller
             'Member/Show',
             [
                 "member" => $member,
-                "storeC" => $store
             ]
         );
     }
@@ -131,13 +103,6 @@ class MemberController extends Controller
         // if (!Gate::allows('see-member-details', $member->id)) {
         //     abort(403);
         // }
-        $sess = $request->session();
-
-        $store = $sess->get("store", []);
-        $readonly = !!$request->query("readonly", true);
-        $store["readonly2"] = $readonly;
-        $sess->put("store", $store);
-
         $teamIndex = $request->query("teamIndex");
         $member->load([
             "teams" => function ($query) {
@@ -167,7 +132,6 @@ class MemberController extends Controller
                 "teamIndex" => $teamIndex,
                 "allTeams" => $allTeams,
                 "memberRoles" => $memberRoles,
-                "storeC" => $store
             ]
         );
     }
@@ -177,13 +141,6 @@ class MemberController extends Controller
         if (!Gate::allows('readhistory')) {
             abort(403);
         }
-        $sess = $request->session();
-        $store = $sess->get("store", []);
-        $pageno = $request->query("pageno", null);
-        if ($pageno !== null) {
-            $store["pageno"] = $pageno;
-        }
-        $sess->put("store", $store);
         $id = $request->all()["id"]; // TODO? get?
         $history = HistoryController::getByTableAndId("members", $id);
         $users = User::all()->map(fn($u) => ["email" => $u->email, "id" => $u->id]);
@@ -198,7 +155,6 @@ class MemberController extends Controller
                 "teams" => $teams,
                 "users" => $users,
                 "history" => $history,
-                "storeC" => $store,
                 "retour" => "member.index"
             ]
         );

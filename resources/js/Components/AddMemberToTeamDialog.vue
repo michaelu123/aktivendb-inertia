@@ -89,7 +89,6 @@ const props = defineProps([
     "editedItem",
     "memberRoles",
     "allMembers",
-    "store",
 ]);
 
 const r = reactive({
@@ -98,7 +97,7 @@ const r = reactive({
 
 const page = usePage();
 
-const readonly = computed(() => page.props.storeC.readonly2);
+const readonly = computed(() => localStorage.getItem("readonly2") != "false");
 
 const mtForm = useForm({
     id: -1,

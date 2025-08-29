@@ -17,15 +17,6 @@ class TeamController extends Controller
      */
     public function index(Request $request)
     {
-        $sess = $request->session();
-
-        $store = $sess->get("store", []);
-        $pageno = $request->query("pageno", null);
-        if ($pageno !== null) {
-            $store["pageno"] = $pageno;
-        }
-        $sess->put("store", $store);
-
         $teams = Team::orderBy("name")->get();
         // $teams = $teams->filter(
         //     fn($t) => Gate::allows("edit-team-details", $t->id)
@@ -36,7 +27,6 @@ class TeamController extends Controller
             [
                 "teams" => $teams,
                 // "teams" => Team::orderBy("name")->get(),
-                "storeC" => $store
             ]
         );
     }
@@ -48,13 +38,10 @@ class TeamController extends Controller
     {
         $team = new Team;
         $team->id = -1;
-        $store = $request->session()->get("store", []);
-        $store["readonly1"] = false;
         return inertia(
             'Team/Show',
             [
                 "team" => $team,
-                "storeC" => $store
             ]
         );
     }
@@ -85,19 +72,6 @@ class TeamController extends Controller
      */
     public function show(Team $team, Request $request)
     {
-        $sess = $request->session();
-
-        $store = $sess->get("store", []);
-        $readonly = $request->query("readonly", null);
-        if ($readonly !== null) {
-            $store["readonly1"] = !!$readonly;
-        }
-        $pageno = $request->query("pageno", null);
-        if ($pageno !== null) {
-            $store["pageno"] = $pageno;
-        }
-        $sess->put("store", $store);
-
         if (Gate::allows("edit-team-details", $team->id)) {
             $team->load([
                 "members" => function ($query) {
@@ -112,20 +86,12 @@ class TeamController extends Controller
             'Team/Show',
             [
                 "team" => $team,
-                "storeC" => $store
             ]
         );
     }
 
     public function showWithDialog(Team $team, Request $request)
     {
-        $sess = $request->session();
-
-        $store = $sess->get("store", []);
-        $readonly = !!$request->query("readonly", true);
-        $store["readonly2"] = $readonly;
-        $sess->put("store", $store);
-
         $memberIndex = $request->query("memberIndex");
         if (Gate::allows("edit-team-details", $team->id)) {
             $team->load([
@@ -153,7 +119,6 @@ class TeamController extends Controller
                 "memberIndex" => $memberIndex,
                 "allMembers" => $allMembers,
                 "memberRoles" => $memberRoles,
-                "storeC" => $store
             ]
         );
     }
@@ -163,13 +128,6 @@ class TeamController extends Controller
         if (!Gate::allows('readhistory')) {
             abort(403);
         }
-        $sess = $request->session();
-        $store = $sess->get("store", []);
-        $pageno = $request->query("pageno", null);
-        if ($pageno !== null) {
-            $store["pageno"] = $pageno;
-        }
-        $sess->put("store", $store);
         $id = $request->all()["id"]; // TODO? get?
         $history = HistoryController::getByTableAndId("project_teams", $id);
         $users = User::all()->map(fn($u) => ["email" => $u->email, "id" => $u->id]);
@@ -184,7 +142,6 @@ class TeamController extends Controller
                 "teams" => $teams,
                 "users" => $users,
                 "history" => $history,
-                "storeC" => $store,
                 "retour" => "team.index"
             ]
         );

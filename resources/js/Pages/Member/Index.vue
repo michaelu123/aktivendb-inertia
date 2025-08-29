@@ -17,7 +17,8 @@
             :headers="headers"
             :items="members"
             :search="r.search"
-            v-model:page="r.pageno"
+            v-model:page="r.pageNo"
+            v-model:items-per-page="r.itemsPerPage"
             @click:row="viewItem"
         >
             <template v-slot:top>
@@ -166,7 +167,7 @@ import HistoryDialog from "@/Components/HistoryDialog.vue";
 import Circle012 from "@/Components/Circle012.vue";
 import CircleTF from "@/Components/CircleTF.vue";
 import { makeSchema } from "@/utils";
-import { reactive } from "vue";
+import { reactive, onMounted } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 import writeXlsxFile from "write-excel-file";
@@ -176,8 +177,6 @@ const props = defineProps({
     teams: Array,
     users: Array,
     history: Array,
-    storeC: Object,
-    storeS: Object,
     retour: String,
 });
 
@@ -279,7 +278,8 @@ const r = reactive({
     agSwitch: true,
     excelFileName: "",
     preferredEmail: "Bevorzugte Email-Adresse",
-    pageno: props.storeC.pageno ?? 1,
+    pageNo: 1,
+    itemsPerPage: 10,
 });
 
 const alert = reactive({
@@ -290,6 +290,15 @@ const alert = reactive({
 
 const page = usePage();
 
+onMounted(() => {
+    const search = localStorage.getItem("searchM");
+    if (search) r.search = search;
+    const pageNo = localStorage.getItem("pageNoM");
+    if (pageNo) r.pageNo = pageNo;
+    const itemsPerPage = localStorage.getItem("itemsPerPageM");
+    if (itemsPerPage) r.itemsPerPage = itemsPerPage;
+});
+
 function isAdmin() {
     return !!page.props.user.is_admin;
 }
@@ -299,9 +308,9 @@ function mayReadHistory() {
 }
 
 function showItem(item, readonly) {
-    router.get(
-        route("member.show", { member: item.id, readonly, pageno: r.pageno })
-    );
+    localStorage.setItem("readonlyM", readonly);
+    rememberIndex();
+    router.get(route("member.show", { member: item.id }));
 }
 
 function viewItem(ev, { item }) {
@@ -314,11 +323,13 @@ function editItem(item) {
 
 function deleteItem(item) {
     if (confirm("Mitglied wirklich löschen?")) {
+        rememberIndex();
         router.delete(route("member.destroy", { member: item.id }));
     }
 }
 
 function addMember() {
+    rememberIndex();
     router.get(route("member.create"));
 }
 
@@ -389,8 +400,13 @@ function historyItem(item) {
         id: item.id,
         m_or_t: "m",
     });
-    hform.post(
-        route("member.indexWithHistory", { member: item.id, pageno: r.pageno })
-    );
+    rememberIndex();
+    hform.post(route("member.indexWithHistory", { member: item.id }));
+}
+
+function rememberIndex() {
+    localStorage.setItem("searchM", r.search);
+    localStorage.setItem("pageNoM", r.pageNo);
+    localStorage.setItem("itemsPerPageM", r.itemsPerPage);
 }
 </script>

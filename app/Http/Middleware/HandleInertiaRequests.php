@@ -36,8 +36,6 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $sess = $request->session();
-        $store = $sess->get("store", []);
         $res = [
             ...parent::share($request),
             'flash' => [
@@ -50,7 +48,6 @@ class HandleInertiaRequests extends Middleware
                 "is_admin" => $user->isAdmin,
                 "may_read_history" => $user->mayReadHistory,
             ] : null,
-            "storeS" => $store,
         ];
         return $res;
     }

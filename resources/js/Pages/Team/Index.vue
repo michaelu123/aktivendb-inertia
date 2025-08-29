@@ -18,8 +18,8 @@
             :items="selTeams"
             :search="r.search"
             @click:row="viewItem"
-            v-model.pageCount="r.pageCount"
-            v-model:page="r.pageno"
+            v-model:page="r.pageNo"
+            v-model:items-per-page="r.itemsPerPage"
         >
             <template v-slot:top>
                 <HistoryDialog
@@ -123,7 +123,7 @@
 
 <script setup>
 import HistoryDialog from "@/Components/HistoryDialog.vue";
-import { computed, reactive } from "vue";
+import { computed, reactive, onMounted } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy";
 import writeXlsxFile from "write-excel-file";
@@ -133,8 +133,6 @@ const props = defineProps({
     teams: Array,
     users: Array,
     history: Array,
-    storeC: Object,
-    storeS: Object,
     retour: String,
 });
 
@@ -159,8 +157,8 @@ const r = reactive({
     activeSwitch: true,
     myAgSwitch: true,
     excelFileName: "",
-    pageno: props.storeC.pageno ?? 1,
-    pageCount: 0,
+    pageNo: 1,
+    itemsPerPage: 10,
 });
 
 const alert = reactive({
@@ -178,6 +176,15 @@ const selTeams = computed(() => {
 
 const page = usePage();
 
+onMounted(() => {
+    const search = localStorage.getItem("searchT");
+    if (search) r.search = search;
+    const pageNo = localStorage.getItem("pageNoT");
+    if (pageNo) r.pageNo = pageNo;
+    const itemsPerPage = localStorage.getItem("itemsPerPageT");
+    if (itemsPerPage) r.itemsPerPage = itemsPerPage;
+});
+
 function isAdmin() {
     return !!page.props.user.is_admin;
 }
@@ -187,9 +194,9 @@ function mayReadHistory() {
 }
 
 function showItem(item, readonly) {
-    router.get(
-        route("team.show", { team: item.id, readonly, pageno: r.pageno })
-    );
+    localStorage.setItem("readonlyT", readonly);
+    rememberIndex();
+    router.get(route("team.show", { team: item.id }));
 }
 
 function viewItem(ev, { item }) {
@@ -202,11 +209,13 @@ function editItem(item) {
 
 function deleteItem(item) {
     if (confirm("AG/OG wirklich löschen?")) {
+        rememberIndex();
         router.delete(route("team.destroy", { team: item.id }));
     }
 }
 
 function addTeam() {
+    rememberIndex();
     router.get(route("team.create"));
 }
 
@@ -311,8 +320,13 @@ function historyItem(item) {
         id: item.id,
         m_or_t: "t",
     });
-    hform.post(
-        route("team.indexWithHistory", { team: item.id, pageno: r.pageno })
-    );
+    rememberIndex();
+    hform.post(route("team.indexWithHistory", { team: item.id }));
+}
+
+function rememberIndex() {
+    localStorage.setItem("searchT", r.search);
+    localStorage.setItem("pageNoT", r.pageNo);
+    localStorage.setItem("itemsPerPageT", r.itemsPerPage);
 }
 </script>

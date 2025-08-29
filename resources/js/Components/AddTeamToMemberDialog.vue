@@ -88,10 +88,9 @@ const props = defineProps([
     "editedItem",
     "memberRoles",
     "allTeams",
-    "store",
 ]);
 const page = usePage();
-const readonly = computed(() => page.props.storeC.readonly2);
+const readonly = computed(() => localStorage.getItem("readonly2") != "false");
 
 const mtForm = useForm({
     id: -1,

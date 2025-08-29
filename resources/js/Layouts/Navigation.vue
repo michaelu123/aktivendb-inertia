@@ -9,14 +9,16 @@
             <v-btn variant="text" :to="route('home')"> Home </v-btn>
             <v-btn
                 variant="text"
-                :to="route('member.index', { pageno: 1 })"
+                :to="route('member.index')"
+                @click="clearRemIndexM"
                 v-if="is_logged_in"
             >
                 Aktive
             </v-btn>
             <v-btn
                 variant="text"
-                :to="route('team.index', { pageno: 1 })"
+                :to="route('team.index')"
+                @click="clearRemIndexT"
                 v-if="is_logged_in"
             >
                 AG's/OG's
@@ -52,4 +54,18 @@ const is_logged_in = computed(() => {
 const may_read_history = computed(() => {
     return page.props?.user?.may_read_history;
 });
+
+function clearRemIndexM() {
+    localStorage.removeItem("searchM");
+    localStorage.removeItem("pageNoM");
+    localStorage.removeItem("itemsPerPageM");
+    localStorage.removeItem("readonlyM");
+}
+
+function clearRemIndexT() {
+    localStorage.removeItem("searchT");
+    localStorage.removeItem("pageNoT");
+    localStorage.removeItem("itemsPerPageT");
+    localStorage.removeItem("readonlyT");
+}
 </script>

@@ -350,17 +350,9 @@ const props = defineProps({
     teamIndex: -1,
     allTeams: Array,
     memberRoles: Array,
-    storeC: Object,
-    storeS: Object,
-    // without errors,flash,user console shows warnings!?
-    // errors: Object,
-    // flash: Object,
-    // user: Object,
 });
 
-let readonly = computed(() => {
-    return props.storeC.readonly1;
-});
+let readonly = computed(() => localStorage.getItem("readonlyM") != "false");
 
 const editedItem = useForm({
     id: props.member.id ?? -1,
@@ -555,10 +547,10 @@ function setResponded(e) {
 
 function showTeamMemberItem(item, readonly) {
     const teamIndex = props.member.teams.indexOf(item);
+    localStorage.setItem("readonly2", readonly);
     router.get(
         route("member.showWithDialog", {
             member: props.member.id,
-            readonly,
             teamIndex,
         })
     );
