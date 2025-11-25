@@ -6,5 +6,3 @@ in Vscode run/debug, php, Listen for XDebug, um Breakpoints in php setzen zu kö
 In Herd einmalig eine Site aktivendb-inertia einrichten.
 Herd starten, site aktivendb-inertia selektieren, URL http://aktivendb-inertia.test aufrufen.
 MySql läuft in Docker Container (docker-compose.yml im Repository)
-
-Status: noch viel zu tun...
