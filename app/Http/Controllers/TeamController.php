@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Member;
-use App\Models\MemberRole;
-use App\Models\Team;
-use App\Models\TeamMember;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\TeamMember;
+use App\Models\Team;
+use App\Models\MemberRole;
+use App\Models\Member;
 
 class TeamController extends Controller
 {
@@ -184,7 +184,7 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
-        if (Gate::allows("edit-team-details", $team->id)) {
+        if (!Gate::allows("edit-team-details", $team->id)) {
             abort(403);
         }
         $v = $request->validate([
