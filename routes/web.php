@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\HistoryController;
-use App\Http\Controllers\MemberController;
-use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return inertia("Homeview");
@@ -31,7 +31,7 @@ Route::put('team/updatetm', [TeamController::class, 'updateTM'])->middleware("au
 Route::delete('team/destroytm/{id}', [TeamController::class, 'destroyTM'])->middleware("auth")->name("team.destroytm");
 Route::resource('team', TeamController::class)
     ->only(['index', 'show', 'create', 'store', 'update', 'destroy']);
-Route::get('team/{id}/members', [TeamController::class, 'teams'])->middleware("auth")->name("members");
+Route::get('team/{id}/members', [TeamController::class, 'members'])->middleware("auth")->name("members");
 Route::get('team/{team}/withdialog', [TeamController::class, 'showWithDialog'])->middleware("auth")->name("team.showWithDialog");
 Route::post('team/{team}/history', [TeamController::class, 'indexWithHistory'])->middleware("auth")->name("team.indexWithHistory");
 

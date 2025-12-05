@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TeamMember;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Request;
+use App\Models\TeamMember;
 
 class TeamMemberHelper
 {
@@ -40,6 +40,7 @@ class TeamMemberHelper
     }
     $v["project_team_id"] = $teamId; // Is there a better way for column rename?
     unset($v["team_id"]);
+    $v["admin_comments"] ??= "";
     $tm->update($v);
     if ($from == "member") {
       return redirect()

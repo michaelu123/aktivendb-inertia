@@ -167,7 +167,7 @@ class TeamController extends Controller
             }
         ]);
         return [
-            "members" => $t->members->map(fn($member): string => $member->last_name . ", " . $member->first_name)
+            "members" => $t->members
         ];
     }
 

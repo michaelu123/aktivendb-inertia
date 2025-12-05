@@ -232,12 +232,12 @@ async function exportExcel() {
     for (let t of props.teams) {
         if (!t.with_details) continue;
         try {
-            t.members = await getTeamMembersFromApi(m.id);
+            t.members = await getTeamMembersFromApi(t.id);
             if (r.activeSwitch) {
                 t.members = t.members.filter((m) => m.active == "1");
             }
             t.leaders = t.members
-                .filter((m) => m.team_member.member_role_title == "Vorsitz")
+                .filter((m) => m.team_member.member_role_id == 1)
                 .map((m) => m.first_name + " " + m.last_name)
                 .join(", ");
             myTeams.push(t);

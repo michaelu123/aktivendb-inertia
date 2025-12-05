@@ -12,6 +12,12 @@
         >
             {{ flashSuccess }}
         </div>
+        <div
+            v-if="errors"
+            class="flex items-center justify-center h-10 mt-4 bg-red-200 border border-red-200 rounded-md shadow-sm dark:border-green-50 dark:bg-red-900"
+        >
+            Fehler im Formular!
+        </div>
         <slot>Default</slot>
     </main>
 </template>
@@ -23,5 +29,6 @@ import Navigation from "./Navigation.vue";
 
 const page = usePage();
 const flashSuccess = computed(() => page.props?.flash?.success);
+const errors = computed(() => Object.entries(page.props?.errors).length > 0);
 const user = computed(() => page.props?.user);
 </script>
