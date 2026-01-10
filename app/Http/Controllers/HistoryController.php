@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\History;
-use App\Models\Member;
-use App\Models\Team;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Team;
+use App\Models\Member;
+use App\Models\History;
 
 class HistoryController extends Controller
 {
@@ -74,8 +74,8 @@ class HistoryController extends Controller
         } else if ($v["m_or_t"] == "t") {
             $history = $this->getByTableAndId("project_teams", $v["id"]);
         } else {
-            $begin = $v["begin"];
-            $end = $v["end"];
+            $begin = $v["begin"] . " 01:00:00";
+            $end = $v["end"] . " 23:59:59";
             $history = History::where("created_at", ">=", $begin)->where("created_at", "<=", $end)->get();
         }
         $users = User::all()->map(fn($u) => ["email" => $u->email, "id" => $u->id]);
