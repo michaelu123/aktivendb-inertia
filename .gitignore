@@ -26,3 +26,5 @@ Thumbs.db
 xxx*
 env.*
 README.muh
+_ide_helper.php
+.phpstorm.meta.php

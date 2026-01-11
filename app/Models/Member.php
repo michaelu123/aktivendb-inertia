@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Observers\MemberObserver;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use App\Observers\MemberObserver;
 
 class Member extends Model
 {
@@ -13,6 +13,7 @@ class Member extends Model
     use MemberObserver;
 
     public $with_details = true;
+    public $apiCall = false;
 
     protected $appends = [
         'with_details'
@@ -74,6 +75,16 @@ class Member extends Model
         'deleted_at'
     ];
 
+    public static $rules =
+        [
+            'email_adfc' => 'email',
+            'email_private' => 'email',
+            'dsgvo_signature' => 'nullable|in:0,1,2',
+            'police_certificate' => 'nullable|in:0,1,2',
+            'polcert_date' => 'nullable|date',
+        ];
+
+
     public function getWithDetailsAttribute()
     {
         return Gate::allows('see-member-details', $this->id);
@@ -93,7 +104,16 @@ class Member extends Model
         } else {
             $this->with_details = true;
         }
-        return parent::toJson($options);
+        $j = parent::toJson($options);
+        if ($this->apiCall) {
+            $j = str_replace(
+                ["teams", "team_member"],
+                ["project_teams", "project_team_member"],
+                $j
+            );
+        }
+        return $j;
+
     }
 
     public function toArray()

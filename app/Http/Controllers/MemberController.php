@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Member;
-use App\Models\MemberRole;
-use App\Models\Team;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Team;
+use App\Models\MemberRole;
+use App\Models\Member;
 
 class MemberController extends Controller
 {
@@ -19,7 +19,7 @@ class MemberController extends Controller
         return inertia(
             'Member/Index',
             [
-                "members" => Member::orderBy("last_name")->orderBy("first_name")->orderBy("first_name")->get(),
+                "members" => Member::orderBy("last_name")->orderBy("first_name")->get(),
             ]
         );
     }
