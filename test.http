@@ -1,4 +1,4 @@
-@token=30|nfBHcGRMFqrNMvbdRXlrOotJQKjj3OLTLO5cV51rae4e434e
+@token=32|2XrXZF6HTlyulDXtxJFVz820WjNkMouo23SXPUZy72da1978
 ###
 POST http://aktivendb-inertia.test/auth/login 
 content-type: application/json
@@ -20,10 +20,7 @@ GET http://aktivendb-inertia.test/api/member/21?token={{token}}
 content-type: application/json
 accept: application/json
 ###
-PUT http://aktivendb-inertia.test/api/project-team/20?token={{token}}
+GET http://aktivendb-inertia.test/api/project-team/20?token={{token}}
 content-type: application/json
-
-{
-    "email": "xxag-it_aktive@groups.adfc-muenchen.de", 
-}
+accept: application/json
 ###

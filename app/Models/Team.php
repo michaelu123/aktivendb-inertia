@@ -1,10 +1,10 @@
 <?php
 namespace App\Models;
 
-use App\Observers\TeamObserver;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use App\Observers\TeamObserver;
 
 class Team extends Model
 {
@@ -13,6 +13,8 @@ class Team extends Model
   use TeamObserver;
 
   protected $table = "project_teams";
+  public $apiCall = false;
+
 
   protected $appends = [
     'with_details'
@@ -54,4 +56,19 @@ class Team extends Model
       ->as('team_member');
     return $res;
   }
+
+  public function toJson($options = 0)
+  {
+    $j = parent::toJson($options);
+    if ($this->apiCall) {
+      $j = str_replace(
+        "team_member",
+        "project_team_member",
+        $j
+      );
+    }
+    return $j;
+  }
+
+
 }

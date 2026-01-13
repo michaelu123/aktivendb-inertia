@@ -1,0 +1,29 @@
+@token=1|toFGaGhLlAaUsTBj4tES8uz2LFHr9c4MV15Iszmkeaf657e4
+###
+POST https://aktivendb.adfc-muenchen.de/auth/login 
+content-type: application/json
+
+{
+    "email": "michael.uhlenberg@adfc-muenchen.de", 
+    "password": "x?aktdb/#"
+}
+###
+GET https://aktivendb.adfc-muenchen.de/api/members?token={{token}}
+content-type: application/json
+accept: application/json
+###
+GET https://aktivendb.adfc-muenchen.de/api/project-teams?token={{token}}
+content-type: application/json
+accept: application/json
+###
+GET https://aktivendb.adfc-muenchen.de/api/member/21?token={{token}}
+content-type: application/json
+accept: application/json
+###
+PUT https://aktivendb.adfc-muenchen.de/api/project-team/20?token={{token}}
+content-type: application/json
+
+{
+    "email": "xxag-it_aktive@groups.adfc-muenchen.de", 
+}
+###

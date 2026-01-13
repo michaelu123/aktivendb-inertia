@@ -14,17 +14,7 @@ class TeamsController extends Controller
 
     public function all(Request $request)
     {
-        $member_id = $request->get('member_id');
-        $with_members = (bool) $request->get('with_members');
-        if (!$member_id) {
-            if ($with_members) {
-                return Team::with('members')->get();
-            } else {
-                return Team::all();
-            }
-        } else {
-            return Member::with('teams')->where('id', (int) $member_id)->orWhere('reference', $member_id)->first();
-        }
+        return Team::all();
     }
 
     public function get(Request $request, $id)
@@ -36,6 +26,7 @@ class TeamsController extends Controller
             }
         }
         $team->with_details = true;
+        $team->apiCall = true;
 
         return $team;
     }

@@ -15,9 +15,11 @@ class CheckIsAdmin
    */
   public function handle(Request $request, Closure $next): Response
   {
-    $user = $request->user();
-    if (!$user->isAdmin) {
-      return response("must be admin", 403);
+    if ($request->path() != "auth/login") {
+      $user = $request->user();
+      if (!$user->isAdmin) {
+        return response("must be admin", 403);
+      }
     }
     return $next($request);
   }
