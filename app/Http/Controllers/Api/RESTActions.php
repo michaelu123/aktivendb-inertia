@@ -37,6 +37,7 @@ trait RESTActions
     } else {
       $v = $request->validate($m::$rules);
     }
+    $v = $request->all(); // ???
     return $this->respond(Response::HTTP_CREATED, ($m::create($v))->fresh());
   }
 

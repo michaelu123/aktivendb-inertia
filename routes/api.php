@@ -16,7 +16,7 @@ $router->group(["prefix" => "api", "middleware" => "auth:sanctum"], function () 
      */
     $router->get('members', [MembersController::class, 'all'])->name("api.members.all");
     $router->get('member/{id}', [MembersController::class, 'get'])->name("api.members.get");
-    # $router->post('member', [MembersController::class, 'add'])->name("api.members.add"); # not used by aktdb_tool
+    $router->post('member', [MembersController::class, 'add'])->name("api.members.add");
     $router->put('member/{id}', [MembersController::class, 'put'])->name("api.members.put");
     $router->delete('member/{id}', [MembersController::class, 'remove'])->name("api.members.remove");
 

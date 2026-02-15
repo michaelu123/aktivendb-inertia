@@ -352,7 +352,10 @@ const props = defineProps({
     memberRoles: Array,
 });
 
-let readonly = computed(() => localStorage.getItem("readonlyM") != "false");
+let readonly = computed(() => {
+    let rdonly = localStorage.getItem("readonlyM");
+    return rdonly != null && rdonly != "false";
+});
 
 const editedItem = useForm({
     id: props.member.id ?? -1,
@@ -449,7 +452,7 @@ onMounted(() => {
     if (props.teamIndex && props.teamIndex >= 0) {
         Object.assign(
             editWindow.teamList.editedTeamMember,
-            props.member.teams[props.teamIndex]
+            props.member.teams[props.teamIndex],
         );
     } else {
         editWindow.teamList.editedTeamMember = {
@@ -552,7 +555,7 @@ function showTeamMemberItem(item, readonly) {
         route("member.showWithDialog", {
             member: props.member.id,
             teamIndex,
-        })
+        }),
     );
 }
 
