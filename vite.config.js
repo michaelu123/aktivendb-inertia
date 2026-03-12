@@ -37,4 +37,10 @@ export default defineConfig({
             ziggy: path.resolve("vendor/tightenco/ziggy/dist"),
         },
     },
+    server: {
+        cors: true,
+        watch: {
+            ignored: ["**/storage/framework/views/**"],
+        },
+    },
 });

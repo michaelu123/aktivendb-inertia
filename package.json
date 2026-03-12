@@ -8,6 +8,7 @@
     },
     "devDependencies": {
         "@mdi/font": "^7.4.47",
+        "@tailwindcss/typography": "^0.5.19",
         "@tailwindcss/vite": "4.1.11",
         "@vitejs/plugin-vue": "6.0.0",
         "axios": "1.10.0",

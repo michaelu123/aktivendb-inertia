@@ -41,3 +41,5 @@ Route::post('history', [HistoryController::class, 'showWithHistory'])->middlewar
 // the url /app/index.html#/login was widely communicated as login url
 Route::get('/app/index.html{any}', [AuthController::class, 'create'])->where('any', '.*')->name("app.catchall");
 // http://aktivendb-inertia.test/app/index.html#/login
+
+Route::livewire("sb/{id}", "pages::serienbrief")->name("serienbrief");
