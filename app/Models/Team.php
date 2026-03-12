@@ -57,6 +57,19 @@ class Team extends Model
     return $res;
   }
 
+  public function sbMembers()
+  {
+    $res = $this->belongsToMany(
+      'App\Models\SbMember',
+      'team_sbmembers',
+      "team_id",
+      "sbmember_id"
+    )
+      ->using('App\Models\TeamSbMember')
+      ->as('team_sbmembers');
+    return $res;
+  }
+
   public function toJson($options = 0)
   {
     $j = parent::toJson($options);
