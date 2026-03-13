@@ -16,27 +16,20 @@ return new class extends Migration {
             $table->foreign('member_id')->references('id')->on('members')->onDelete("cascade");
             $table->string('first_name');
             $table->string('last_name');
+            $table->boolean('speicherungok');
+            $table->boolean('aktiv');
             $table->string('email_adfc')->nullable();
             $table->string('email_private')->nullable();
             $table->string('phone_primary')->nullable();
             $table->string('phone_secondary')->nullable();
             $table->string('address')->nullable();
             $table->string('adfc_id')->nullable();
-            $table->text('admin_comments')->nullable();
-            $table->date('latest_first_aid_training')->nullable();
             $table->string('gender')->nullable();
             $table->text('interests')->nullable();
-            $table->date('latest_contact')->nullable();
-            $table->boolean('active')->default(true);
             $table->string('birthday')->nullable();
-            $table->string('status', 4000)->nullable();
-            $table->boolean('responded_to_questionaire')->nullable();
-            $table->datetime('responded_to_questionaire_at')->nullable();
-            $table->boolean('dsgvo_signature')->nullable();
-            $table->boolean('police_certificate')->nullable();
-            $table->date('polcert_date')->nullable();
+            $table->string('admin_comments')->nullable();
+            $table->datetime('eingetragen')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

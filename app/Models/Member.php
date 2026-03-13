@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Observers\MemberObserver;
+use Illuminate\Support\Facades\Request;
 
 class Member extends Model
 {
@@ -98,7 +99,10 @@ class Member extends Model
 
     public function toJson($options = 0)
     {
-        if (Gate::denies('see-member-details', $this->id)) {
+        if (
+            !str_starts_with(Request::getPathInfo(), "/sb/") &&
+            Gate::denies('see-member-details', $this->id)
+        ) {
             $this->hidden = array_merge($this->hidden, $this->restricted);
             $this->with_details = false;
         } else {
@@ -118,7 +122,10 @@ class Member extends Model
 
     public function toArray()
     {
-        if (Gate::denies('see-member-details', $this->id)) {
+        if (
+            !str_starts_with(Request::getPathInfo(), "/sb/") &&
+            Gate::denies('see-member-details', $this->id)
+        ) {
             $this->hidden = array_merge($this->hidden, $this->restricted);
             $this->with_details = false;
         } else {
@@ -129,7 +136,10 @@ class Member extends Model
 
     public function getAttribute($key)
     {
-        if (in_array($key, $this->restricted) && Gate::denies('see-member-details', $this->id)) {
+        if (
+            !str_starts_with(Request::getPathInfo(), "/sb/") &&
+            in_array($key, $this->restricted) && Gate::denies('see-member-details', $this->id)
+        ) {
             return null;
         } else {
             return parent::getAttribute($key);

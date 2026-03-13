@@ -13,47 +13,19 @@ class SbMember extends Model
         'member_id',
         'first_name',
         'last_name',
+        'speicherungok',
+        'aktiv',
         'email_adfc',
+        'email_private',
         'phone_primary',
         'phone_secondary',
-        'email_private',
         'address',
         'adfc_id',
-        'admin_comments',
-        'latest_first_aid_training',
         'gender',
         'interests',
-        'latest_contact',
-        'active',
         'birthday',
-        'status',
-        'responded_to_questionaire',
-        'responded_to_questionaire_at',
-        'dsgvo_signature',
-        'police_certificate',
-        'polcert_date',
+        'admin_comments',
     ];
-
-    protected $dates = [
-        'deleted_at'
-    ];
-
-    public static $rules =
-        [
-            'email_adfc' => 'email',
-            'email_private' => 'email',
-            'dsgvo_signature' => 'nullable|in:0,1,2',
-            'police_certificate' => 'nullable|in:0,1,2',
-            'polcert_date' => 'nullable|date',
-        ];
-
-
-    public static function create(array $attributes = [])
-    {
-        $model = static::query()->create($attributes);
-        return $model;
-    }
-
 
     // Relationships
 
