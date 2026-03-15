@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Observers\MemberObserver;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Log;
 
 class Member extends Model
 {
@@ -97,12 +97,24 @@ class Member extends Model
         return $model;
     }
 
+    protected function snapshotName(): string|null
+    {
+        $req = request()->all();
+        if (isset($req["components"])) {
+            $components = $req["components"];
+            $snapshot = $components[0]["snapshot"];
+            $snapshot = json_decode($snapshot);
+            $name = $snapshot->memo->name;
+            Log::info("1snapshotName " . $name);
+            return $name;
+        }
+        Log::info("2snapshotName null");
+        return null;
+    }
+
     public function toJson($options = 0)
     {
-        if (
-            !str_starts_with(Request::getPathInfo(), "/sb/") &&
-            Gate::denies('see-member-details', $this->id)
-        ) {
+        if (Gate::denies('see-member-details', $this->id)) {
             $this->hidden = array_merge($this->hidden, $this->restricted);
             $this->with_details = false;
         } else {
@@ -122,10 +134,7 @@ class Member extends Model
 
     public function toArray()
     {
-        if (
-            !str_starts_with(Request::getPathInfo(), "/sb/") &&
-            Gate::denies('see-member-details', $this->id)
-        ) {
+        if (Gate::denies('see-member-details', $this->id)) {
             $this->hidden = array_merge($this->hidden, $this->restricted);
             $this->with_details = false;
         } else {
@@ -136,10 +145,7 @@ class Member extends Model
 
     public function getAttribute($key)
     {
-        if (
-            !str_starts_with(Request::getPathInfo(), "/sb/") &&
-            in_array($key, $this->restricted) && Gate::denies('see-member-details', $this->id)
-        ) {
+        if (in_array($key, $this->restricted) && Gate::denies('see-member-details', $this->id)) {
             return null;
         } else {
             return parent::getAttribute($key);

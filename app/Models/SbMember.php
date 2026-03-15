@@ -24,6 +24,7 @@ class SbMember extends Model
         'gender',
         'interests',
         'birthday',
+        'eingetragen',
         'admin_comments',
     ];
 

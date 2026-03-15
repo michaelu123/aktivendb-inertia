@@ -4,17 +4,22 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser, HasName
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     // use HasFactory, Notifiable;
     use SoftDeletes;
     use HasApiTokens;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -99,6 +104,16 @@ class User extends Authenticatable
     public function abilities()
     {
         return $this->belongsToMany('App\Models\Ability', 'ability_user')->whereNull('ability_user.deleted_at');
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->mayReadHistory;
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->member->first_name . " " . $this->member->last_name;
     }
 }
 

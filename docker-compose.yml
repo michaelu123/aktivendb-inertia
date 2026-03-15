@@ -1,4 +1,3 @@
-version: "3.9"
 services:
     mysql:
         image: mariadb:10.8.3
@@ -28,6 +27,7 @@ services:
             UPLOAD_LIMIT: 8M
     mailhog:
         image: mailhog/mailhog
+        restart: always
         ports:
             - 1025:1025
             - 8025:8025
