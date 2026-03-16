@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\SbMembers;
 
-use App\Filament\Resources\SbMembers\Pages\CreateSbMember;
-use App\Filament\Resources\SbMembers\Pages\EditSbMember;
+// use App\Filament\Resources\SbMembers\Pages\CreateSbMember;
+// use App\Filament\Resources\SbMembers\Pages\EditSbMember;
 use App\Filament\Resources\SbMembers\Pages\ListSbMembers;
 use App\Filament\Resources\SbMembers\Schemas\SbMemberForm;
 use App\Filament\Resources\SbMembers\Tables\SbMembersTable;
@@ -44,8 +44,8 @@ class SbMemberResource extends Resource
     {
         return [
             'index' => ListSbMembers::route('/'),
-            'create' => CreateSbMember::route('/create'),
-            'edit' => EditSbMember::route('/{record}/edit'),
+            // 'create' => CreateSbMember::route('/create'),
+            // 'edit' => EditSbMember::route('/{record}/edit'),
         ];
     }
 }

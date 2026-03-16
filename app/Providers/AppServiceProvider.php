@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Listeners\HistoryListener;
 use App\Models\User;
+use Carbon\CarbonImmutable;
+use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -107,5 +110,24 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('readhistory', function (User $user) {
             return $user->has_ability('readhistory');
         });
+
+        $this->configureDefaults();
     }
+
+    /**
+     * Configure default behaviors for production-ready applications.
+     */
+    protected function configureDefaults(): void
+    {
+        Date::use(CarbonImmutable::class);
+
+        DB::prohibitDestructiveCommands(
+            app()->isProduction(),
+        );
+
+        TextInput::configureUsing(function (TextInput $component): void {
+            $component->trim();
+        });
+    }
+
 }

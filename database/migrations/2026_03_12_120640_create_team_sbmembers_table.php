@@ -16,7 +16,9 @@ return new class extends Migration {
         Schema::create('team_sbmembers', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('team_id')->index();
+            $table->foreign('team_id')->references('id')->on('project_teams')->onDelete("cascade");
             $table->unsignedInteger('sbmember_id')->index();
+            $table->foreign('sbmember_id')->references('id')->on('sbmembers')->onDelete("cascade");
             $table->timestamps();
         });
     }

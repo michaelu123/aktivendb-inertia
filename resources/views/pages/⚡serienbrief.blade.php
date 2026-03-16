@@ -10,19 +10,18 @@ use App\Models\Member;
 use App\Models\Team;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
 new class extends Component implements HasSchemas {
-    // noinspection PhpUnusedAliasInspection
-    /** @use \Filament\Schemas\Concerns\InteractsWithSchemas */
-    use \Filament\Schemas\Concerns\InteractsWithSchemas;
-    protected const _TRAITS = [\Filament\Schemas\Concerns\InteractsWithSchemas::class];
+    use InteractsWithSchemas;
+    protected const _TRAITS = [InteractsWithSchemas::class]; // to silence unused warning
 
     public array $data = [];
-    public $member;
+    public $member_id;
 
 
     public $h1R = "Rückmeldung erforderlich - Jährliche Aktualisierung unserer Aktiven-Datenbank";
@@ -63,23 +62,22 @@ new class extends Component implements HasSchemas {
         }
         $this->idEnc = Crypt::encryptString($id); // TODO
         if ($id == 0) {
-            $this->member = new Member();
-            $this->member->id = 0;
+            $this->member_id = 0;
             $memberData = [];
             $this->h1 = $this->h1E;
             $this->p = $this->pE;
             $this->ok = $this->okE;
         } else {
-            $this->member = Member::with("teams")->find((int) $id);
-            Log::info("member " . $this->member);
+            $member = Member::with("teams")->find((int) $id);
+            Log::info("member " . $member);
 
-            $memberData = $this->member->toArray();
+            $memberData = $member->toArray();
             $gender = $memberData['gender'];
             if (isset($gender)) {
                 $gender = [$gender => $gender];
             }
             $memberData['gender'] = $gender;
-            $memberData['teams'] = $this->member->teams->pluck('id', "name")->toArray();
+            $memberData['teams'] = $member->teams->pluck('id', "name")->toArray();
             $this->h1 = $this->h1R;
             $this->p = $this->pR;
             $this->ok = $this->okR;
@@ -114,7 +112,7 @@ new class extends Component implements HasSchemas {
                     ])
                     ->required(),
                 Radio::make("aktiv")
-                    ->hidden($this->member->id == 0)
+                    ->hidden($this->member_id == 0)
                     ->label("Aktives Mitglied?")
                     ->belowLabel(new HtmlString("Wenn Du Dich (noch) als aktives Mitglied siehst, klicke bitte auf Ja. Wenn Du auf Nein klickst, kannst Du noch Deine Daten aktualisieren, aber <strong>bitte klicke am Ende des Formulars auf Senden!</strong>"))
                     ->options([1 => "Ja", 0 => "Nein"])
@@ -174,7 +172,7 @@ new class extends Component implements HasSchemas {
                     ->tel(),
                 CheckboxList::make('teams')->options($teams)
                     ->label("AGs und OGs")
-                    ->belowLabel($this->member->id == 0
+                    ->belowLabel($this->member_id == 0
                         ? "Bitte gib an, für welche Abeitsgruppen (AGs) und/oder Ortsgruppen (OGs) Du Dich interessierst."
                         : "Bitte gib an, in welchen Arbeitsgruppen (AGs)aktiv bist. Wenn Du aktiv in den AGs Tagestouren (TT) oder Radfahrschule (RFS) bist, mach bitte ein Häkchen bei der/den zutreffenden Untergruppe(n)."),
                 TextInput::make('interests')
@@ -192,14 +190,20 @@ new class extends Component implements HasSchemas {
         $genderCnt = count($data['gender']);
         $data['gender'] = $genderCnt == 1 ? $data['gender'][0] : null;
 
-        if ($this->member->id == 0) {
-            $data["name"] = $data["last_name"] . ", " . $data["first_name"];
-            $m = Member::create($data);
-            $this->member->id = $m->id;
-            $data["aktiv"] = 0;
+        if ($this->member_id == 0) {
+            $m = Member::where("first_name", $data["first_name"])->where("last_name", $data["last_name"])->first();
+            if (!isset($m)) {
+                $data["name"] = $data["last_name"] . ", " . $data["first_name"];
+                $data["aktiv"] = 0;
+                $m = Member::create($data);
+                $this->member_id = $m->id;
+            } else {
+                $this->member_id = $m->id;
+                $data["aktiv"] = $m->active;
+            }
         }
-        Log::info("mid " . $this->member->id);
-        $data['member_id'] = $this->member->id;
+        Log::info("member_id " . $this->member_id);
+        $data['member_id'] = $this->member_id;
         Log::info($data);
         SbMember::create($data)->teams()->attach($data['teams']);
         redirect()->route('sbdanke');
@@ -211,7 +215,7 @@ new class extends Component implements HasSchemas {
     <x-slot name="heading">
         <div class="flex flex-row justify-between items-center">
             <p class="lg:text-5xl text-2xl">
-                {{ $this->member->id == 0 ? "Erstanmeldung" : "Deine Daten mit Bitte um Bestätigung" }}
+                {{ $this->member_id == 0 ? "Erstanmeldung" : "Deine Daten mit Bitte um Bestätigung" }}
             </p>
             <img src="/ADFC_MUENCHEN.PNG" alt="">
         </div>
