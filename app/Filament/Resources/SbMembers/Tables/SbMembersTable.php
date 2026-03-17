@@ -2,19 +2,24 @@
 
 namespace App\Filament\Resources\SbMembers\Tables;
 
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+// use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 
 class SbMembersTable
 {
     public static function configure(Table $table): Table
     {
+        $ids = [];
         return $table
             ->columns([
                 TextColumn::make('eingetragen')
@@ -62,6 +67,11 @@ class SbMembersTable
                     ->label("Geburtsjahr")
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('teams.name')
+                    ->label("AGs/OGs")
+                    ->badge()
+                    ->sortable()
+                    ->searchable(),
                 TextInputColumn::make('admin_comments')
                     ->label("Admin-Bemerkung")
                     ->searchable(),
@@ -80,11 +90,28 @@ class SbMembersTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                // EditAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('übernehmen')
+                        ->label("Übernehmen")
+                        ->icon('heroicon-o-chat-bubble-left-ellipsis')
+                        ->deselectRecordsAfterCompletion()
+                        ->modalContent(function (Collection $sbMembers, BulkAction $action) {
+                            $ids = $sbMembers->pluck('id')->toArray();
+                            return new HtmlString(
+                                Blade::render('@livewire("⚡process-sb-members", ["recordIds" => $ids, "id" => $modalId])', [
+                                    'ids' => $ids,
+                                    // if this is no longer ok, look at the modal in Chrome inspector, to see how it is formed.
+                                    'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-0",
+                                ])
+                            );
+                        })
+                        ->modalSubmitAction(false)
+                        ->modalCancelAction(false),
+
                     DeleteBulkAction::make(),
                 ]),
             ])

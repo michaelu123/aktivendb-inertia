@@ -44,3 +44,5 @@ Route::get('/app/index.html{any}', [AuthController::class, 'create'])->where('an
 
 Route::livewire("sb/{id}", "pages::serienbrief")->name("serienbrief");
 Route::livewire("sbdanke", "pages::sbdanke")->name("sbdanke");
+
+Route::livewire("phpinfo", "pages::phpinfo")->name("phpinfo");
