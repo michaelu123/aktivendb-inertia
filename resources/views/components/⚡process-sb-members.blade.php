@@ -11,6 +11,7 @@ new class extends Component {
     public array $log = [];
     public int $totalRecords = 0;
     public string $id;
+    public $vorschau = true;
 
     public function mount(array $recordIds, string $id): void
     {
@@ -88,13 +89,13 @@ new class extends Component {
         }
     }">
 
-    <div>
+    <x-filament::section>
         <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-y-auto" style="max-height: 400px;">
             <pre class="whitespace-pre-wrap font-mono text-sm">
                 @foreach($log as $line){{ $line . "\n" }}@endforeach
             </pre>
         </div>
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <p class="mt-2 mb-10 text-sm text-gray-500 dark:text-gray-400">
             Verarbeitet: {{ $processedCount }} / {{ $totalRecords }}
         </p>
         @if($processedCount < $totalRecords && $this->processedCount > 0)
@@ -102,19 +103,23 @@ new class extends Component {
                 <x-filament::loading-indicator class="h-5 w-5" />
             </div>
         @endif
-    </div>
 
-    <x-filament::actions>
-        <x-filament::button x-show="!processing" wire:click="process" x-on:click="processing = true"
-            :disabled="$totalRecords === 0">
-            Start
-        </x-filament::button>
-        <x-filament::button x-show="processing" disabled class="cursor-wait">
-            <x-filament::loading-indicator class="h-5 w-5 mr-2" />
-            Verarbeite...
-        </x-filament::button>
-        <x-filament::button color="secondary" x-on:click="$dispatch('close-modal', { id: '{{ $this->id }}' })">
-            Schließen
-        </x-filament::button>
-    </x-filament::actions>
-</div>
+        <x-filament::actions>
+            <label class="my-10">
+                <x-filament::input.checkbox wire:model="vorschau" /> <span>Vorschau</span>
+            </label>
+        </x-filament::actions>
+        <x-filament::actions>
+            <x-filament::button x-show="!processing" wire:click="process" x-on:click="processing = true"
+                :disabled="$totalRecords === 0">
+                Start
+            </x-filament::button>
+            <x-filament::button x-show="processing" disabled class="cursor-wait">
+                <x-filament::loading-indicator class="h-5 w-5 mr-2" />
+                Verarbeite...
+            </x-filament::button>
+            <x-filament::button color="secondary" x-on:click="$dispatch('close-modal', { id: '{{ $this->id }}' })">
+                Schließen
+            </x-filament::button>
+        </x-filament::actions>
+    </x-filament::section>

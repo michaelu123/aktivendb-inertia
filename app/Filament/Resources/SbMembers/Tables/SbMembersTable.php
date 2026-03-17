@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\SbMembers\Tables;
 
+use App\Models\SbMember;
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -13,6 +15,7 @@ use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 
 class SbMembersTable
@@ -93,28 +96,47 @@ class SbMembersTable
                 // EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    BulkAction::make('übernehmen')
+            ->toolbarActions(
+                [
+                    BulkActionGroup::make([
+                        BulkAction::make('übernehmen1')
+                            ->label("Übernehmen")
+                            ->icon('heroicon-o-document-plus')
+                            ->deselectRecordsAfterCompletion()
+                            ->modalContent(function (Collection $sbMembers, BulkAction $action) {
+                                $ids = $sbMembers->pluck('id')->toArray();
+                                return new HtmlString(
+                                    Blade::render('@livewire("⚡process-sb-members", ["recordIds" => $ids, "id" => $modalId])', [
+                                        'ids' => $ids,
+                                        // if this is no longer ok, look at the modal in Chrome inspector, to see how it is formed.
+                                        'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-" . $action->getNestingIndex(),
+                                    ])
+                                );
+                            })
+                            ->modalSubmitAction(false)
+                            ->modalCancelAction(false),
+
+                        DeleteBulkAction::make(),
+                    ]),
+                    Action::make('übernehmen2')
                         ->label("Übernehmen")
-                        ->icon('heroicon-o-chat-bubble-left-ellipsis')
-                        ->deselectRecordsAfterCompletion()
-                        ->modalContent(function (Collection $sbMembers, BulkAction $action) {
-                            $ids = $sbMembers->pluck('id')->toArray();
-                            return new HtmlString(
+                        ->icon('heroicon-o-document-plus')
+                        ->modalContent(function (Action $action) {
+                            $ids = SbMember::whereNull('eingetragen')->pluck('id')->toArray();
+                            $html = new HtmlString(
                                 Blade::render('@livewire("⚡process-sb-members", ["recordIds" => $ids, "id" => $modalId])', [
                                     'ids' => $ids,
                                     // if this is no longer ok, look at the modal in Chrome inspector, to see how it is formed.
-                                    'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-0",
+                                    'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-" . $action->getNestingIndex(),
                                 ])
                             );
+                            // Log::info("HTML: " . $html);
+                            return $html;
                         })
                         ->modalSubmitAction(false)
                         ->modalCancelAction(false),
-
-                    DeleteBulkAction::make(),
-                ]),
-            ])
+                ],
+            )
             ->defaultSort('eingetragen', 'asc');
     }
 }

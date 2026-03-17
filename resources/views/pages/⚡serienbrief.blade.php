@@ -61,6 +61,12 @@ new class extends Component implements HasSchemas {
             Log::info("id2 " . $id);
         }
         $this->idEnc = Crypt::encryptString($id); // TODO
+
+        if ($id != 0) {
+            $member = Member::with("teams")->find((int) $id);
+            Log::info("member " . $member);
+            $id = $member != null ? $member->id : 0;
+        }
         if ($id == 0) {
             $this->member_id = 0;
             $memberData = [];
@@ -68,9 +74,6 @@ new class extends Component implements HasSchemas {
             $this->p = $this->pE;
             $this->ok = $this->okE;
         } else {
-            $member = Member::with("teams")->find((int) $id);
-            Log::info("member " . $member);
-
             $memberData = $member->toArray();
             $gender = $memberData['gender'];
             if (isset($gender)) {
