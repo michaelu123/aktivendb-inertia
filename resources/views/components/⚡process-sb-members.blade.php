@@ -105,7 +105,7 @@ new class extends Component {
         @endif
 
         <x-filament::actions>
-            <label class="my-10">
+            <label class="mb-4">
                 <x-filament::input.checkbox wire:model="vorschau" /> <span>Vorschau</span>
             </label>
         </x-filament::actions>
