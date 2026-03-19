@@ -1,0 +1,1 @@
+<p>Klicke auf <a href="{{ $sbUrl }} ">diese URL</a></p>
