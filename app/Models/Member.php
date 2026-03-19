@@ -97,20 +97,29 @@ class Member extends Model
         return $model;
     }
 
-    protected function snapshotName(): string|null
+    // special code to not check permissions coming from Serienbrief form
+    protected function isFromSerienbrief()
     {
+        $pi = request()->getPathInfo();
+        if (str_starts_with($pi, "/sb/")) {
+            return true;
+        }
+        if (!str_starts_with($pi, "/update")) {
+            return false;
+        }
         $req = request()->all();
         if (isset($req["components"])) {
             $components = $req["components"];
             $snapshot = $components[0]["snapshot"];
             $snapshot = json_decode($snapshot);
             $name = $snapshot->memo->name;
-            Log::info("1snapshotName " . $name);
-            return $name;
+        } else {
+            $name = "";
         }
-        Log::info("2snapshotName null");
-        return null;
+        return $name == 'pages::serienbrief';
     }
+
+
 
     public function toJson($options = 0)
     {
@@ -134,7 +143,7 @@ class Member extends Model
 
     public function toArray()
     {
-        if (Gate::denies('see-member-details', $this->id)) {
+        if (!$this->isFromSerienbrief() && Gate::denies('see-member-details', $this->id)) {
             $this->hidden = array_merge($this->hidden, $this->restricted);
             $this->with_details = false;
         } else {

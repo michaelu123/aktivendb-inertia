@@ -46,3 +46,4 @@ Route::livewire("sb/{id}", "pages::serienbrief")->name("serienbrief");
 Route::livewire("sbdanke", "pages::sbdanke")->name("sbdanke");
 
 Route::livewire("phpinfo", "pages::phpinfo")->name("phpinfo");
+Route::livewire("idenc/{id}", "pages::idenc")->middleware("auth")->name("idenc");

@@ -22,28 +22,6 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    // special code to not check permissions coming from Serienbrief form
-    protected function isFromSerienbrief()
-    {
-        dd("xxxxxxxxx"); // TODO is this ever called?
-        if (str_starts_with(request()->getPathInfo(), "/sb/")) {
-            return true;
-        }
-        if (!str_starts_with(request()->getPathInfo(), "/update")) {
-            return false;
-        }
-        $req = request()->all();
-        if (isset($req["components"])) {
-            $components = $req["components"];
-            $snapshot = $components[0]["snapshot"];
-            $snapshot = json_decode($snapshot);
-            $name = $snapshot->memo->name;
-        } else {
-            $name = "";
-        }
-        return $name == 'pages::serienbrief';
-    }
-
     /**
      * Bootstrap any application services.
      */
@@ -52,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(HistoryListener::class);
 
         Gate::define('see-member-details', function (User $user, int $member_id = 0) {
-            if ($user->member_id == $member_id || $user->isAdmin || $this->isFromSerienbrief()) {
+            if ($user->member_id == $member_id || $user->isAdmin) {
                 return true;
             }
             static $last_member_id = 0;

@@ -43,6 +43,7 @@ class SbMember extends Model
             "sbmember_id",
             "team_id"
         )
+            ->withPivot(['id', 'aktion'])
             ->using('App\Models\TeamSbMember')
             ->as('team_sbmembers');
     }

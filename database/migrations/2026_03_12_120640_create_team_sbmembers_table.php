@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->foreign('team_id')->references('id')->on('project_teams')->onDelete("cascade");
             $table->unsignedInteger('sbmember_id')->index();
             $table->foreign('sbmember_id')->references('id')->on('sbmembers')->onDelete("cascade");
+            $table->string("aktion");
             $table->timestamps();
         });
     }

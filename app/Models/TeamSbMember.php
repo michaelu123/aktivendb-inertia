@@ -9,7 +9,9 @@ class TeamSbMember extends Pivot
   protected $table = "team_sbmembers";
 
   protected $fillable = [
-
+    'sbmember_id',
+    'team_id',
+    'aktion'
   ];
 
 

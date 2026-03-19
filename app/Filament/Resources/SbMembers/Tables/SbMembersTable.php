@@ -8,14 +8,12 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-// use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 
 class SbMembersTable
@@ -72,6 +70,16 @@ class SbMembersTable
                     ->searchable(),
                 TextColumn::make('teams.name')
                     ->label("AGs/OGs")
+                    ->color(function (SbMember $sbMember, $state) {
+                        $teams = $sbMember->teams->filter(fn($team) => $team->name == $state);
+                        $team = $teams->first();
+                        $color = match ($team->team_sbmembers->aktion) {
+                            "delete" => "danger",
+                            "add" => "success",
+                            default => "gray",
+                        };
+                        return $color;
+                    })
                     ->badge()
                     ->sortable()
                     ->searchable(),

@@ -13,7 +13,6 @@ use Filament\Forms\Components\Radio;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
 new class extends Component implements HasSchemas {
@@ -21,7 +20,8 @@ new class extends Component implements HasSchemas {
     protected const _TRAITS = [InteractsWithSchemas::class]; // to silence unused warning
 
     public array $data = [];
-    public $member_id;
+    public int $member_id = 0;
+    public array $oldTeams = [];
 
 
     public $h1R = "Rückmeldung erforderlich - Jährliche Aktualisierung unserer Aktiven-Datenbank";
@@ -40,7 +40,7 @@ new class extends Component implements HasSchemas {
                 Wenn wir von Dir keine Bestätigung erhalten, werden wir deine Daten nach einiger Zeit in der
                 Datenbank und Emailverteilern etc. löschen.<br><br>
                 EOD;
-    public $okR = "Bitte klicke auf Ja, wenn Du mit der Speicherung deiner Daten in unserer AktivenDB einverstanden bist. Wenn Du auf Nein klickst, <strong>klicke bitte am Ende des Formulars auf Senden!</strong> Sonst erfahren wir nichts von Deiner Entscheidung.";
+    public $okR = "Bitte klicke auf Ja, wenn Du mit der Speicherung deiner Daten in unserer AktivenDB einverstanden bist. Wenn Du auf Nein klickst, <strong>klicke bitte am Ende des Formulars auf Abschicken!</strong> Sonst erfahren wir nichts von Deiner Entscheidung.";
 
     public $h1E = "Erstanmeldung - Deine Daten für unsere Aktiven-Datenbank";
     public $pE = <<<EOD
@@ -49,30 +49,39 @@ new class extends Component implements HasSchemas {
                 daß Deine Daten gespeichert werden, schickst Du das Formular nicht ab.
                 EOD;
     public $okE = "Bitte klicke auf Ja, um zu bestätigen, daß Du mit der Speicherung deiner Daten in unserer AktivenDB einverstanden bist.";
-    public $h1, $p, $ok;
+
+    public $agSelE = <<<EOD
+                Bitte gib an, für welche Abeitsgruppen (AGs) und/oder Ortsgruppen (OGs) Du Dich interessierst. 
+                Von Deinem Wunsch wird die entsprechende AG/OG-Leitung informiert.
+                EOD;
+    public $agSelR = <<<EOD
+                Bei gesetztem Häkchen bist Du in dieser Arbeitsgruppe (AG) und/oder Ortsgruppe (OG) Mitglied. 
+                Entfernst Du ein Häkchen, wird Deine Mitgliedschaft bei der AG/OG beendet.
+                Setzt Du ein neues Häkchen, wird die betreffende AG/OG-Leitung von Deinem Wunsch informiert, der AG/OG beizutreten. 
+                EOD;
+
+    public $h1, $p, $ok, $agSel;
 
     public string $idEnc;
 
     public function mount(Request $request, $id): void
     {
-        Log::info("id1 " . $id);
         if (strlen($id) > 20) { // TODO
             $id = Crypt::decryptString($id);
-            Log::info("id2 " . $id);
         }
         $this->idEnc = Crypt::encryptString($id); // TODO
 
         if ($id != 0) {
             $member = Member::with("teams")->find((int) $id);
-            Log::info("member " . $member);
             $id = $member != null ? $member->id : 0;
         }
+        $this->member_id = $id;
         if ($id == 0) {
-            $this->member_id = 0;
             $memberData = [];
             $this->h1 = $this->h1E;
             $this->p = $this->pE;
             $this->ok = $this->okE;
+            $this->agSel = $this->agSelE;
         } else {
             $memberData = $member->toArray();
             $gender = $memberData['gender'];
@@ -81,9 +90,11 @@ new class extends Component implements HasSchemas {
             }
             $memberData['gender'] = $gender;
             $memberData['teams'] = $member->teams->pluck('id', "name")->toArray();
+            $this->oldTeams = array_values($memberData["teams"]);
             $this->h1 = $this->h1R;
             $this->p = $this->pR;
             $this->ok = $this->okR;
+            $this->agSel = $this->agSelR;
         }
         $this->form->fill($memberData);
     }
@@ -117,7 +128,7 @@ new class extends Component implements HasSchemas {
                 Radio::make("aktiv")
                     ->hidden($this->member_id == 0)
                     ->label("Aktives Mitglied?")
-                    ->belowLabel(new HtmlString("Wenn Du Dich (noch) als aktives Mitglied siehst, klicke bitte auf Ja. Wenn Du auf Nein klickst, kannst Du noch Deine Daten aktualisieren, aber <strong>bitte klicke am Ende des Formulars auf Senden!</strong>"))
+                    ->belowLabel(new HtmlString("Wenn Du Dich (noch oder wieder) als aktives Mitglied siehst, klicke bitte auf Ja. Wenn Du auf Nein klickst, kannst Du noch Deine Daten aktualisieren, aber <strong>bitte klicke am Ende des Formulars auf Abschicken!</strong>"))
                     ->options([1 => "Ja", 0 => "Nein"])
                     ->validationMessages([
                         "required" => "Bitte Ja oder Nein auswählen."
@@ -175,9 +186,7 @@ new class extends Component implements HasSchemas {
                     ->tel(),
                 CheckboxList::make('teams')->options($teams)
                     ->label("AGs und OGs")
-                    ->belowLabel($this->member_id == 0
-                        ? "Bitte gib an, für welche Abeitsgruppen (AGs) und/oder Ortsgruppen (OGs) Du Dich interessierst."
-                        : "Bitte gib an, in welchen Arbeitsgruppen (AGs)aktiv bist. Wenn Du aktiv in den AGs Tagestouren (TT) oder Radfahrschule (RFS) bist, mach bitte ein Häkchen bei der/den zutreffenden Untergruppe(n)."),
+                    ->belowLabel($this->agSel),
                 TextInput::make('interests')
                     ->label('Interessen')
                     ->belowLabel("Bitte gib Deine Interessen an."),
@@ -203,12 +212,30 @@ new class extends Component implements HasSchemas {
             } else {
                 $this->member_id = $m->id;
                 $data["aktiv"] = $m->active;
+                $m->update($data);
+            }
+        } else {
+            $m = Member::find($this->member_id);
+            $data["aktiv"] = $m->active;
+            $m->update($data);
+        }
+        $data['member_id'] = $this->member_id;
+        $newTeams = $data['teams'];
+        $oldTeams = $this->oldTeams;
+        $teams = [];
+        foreach ($newTeams as $newTeam) {
+            if (in_array($newTeam, $oldTeams)) {
+                $teams[$newTeam] = ["aktion" => "keep"];
+            } else {
+                $teams[$newTeam] = ["aktion" => "add"];
             }
         }
-        Log::info("member_id " . $this->member_id);
-        $data['member_id'] = $this->member_id;
-        Log::info($data);
-        SbMember::create($data)->teams()->attach($data['teams']);
+        foreach ($oldTeams as $oldTeam) {
+            if (!in_array($oldTeam, $newTeams)) {
+                $teams[$oldTeam] = ["aktion" => "delete"];
+            }
+        }
+        SbMember::create($data)->teams()->attach($teams);
         redirect()->route('sbdanke');
     }
 }
@@ -224,7 +251,6 @@ new class extends Component implements HasSchemas {
         </div>
     </x-slot>
     <div>
-        <p>{{ $this->idEnc }}</p>
         <div class="mb-10">
             <h1 class="lg:text-5xl text-2xl mb-10">{{ $this->h1  }}</h1>
             <p>{{ new HtmlString($this->p) }}</p>
