@@ -6,6 +6,7 @@ use App\Listeners\HistoryListener;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -90,6 +91,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->configureDefaults();
+        FilamentTimezone::set('Europe/Berlin');
     }
 
     /**

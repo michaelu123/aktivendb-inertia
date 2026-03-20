@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Members\Tables;
 
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Tables\Columns\IconColumn;
+// use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -19,14 +19,15 @@ class MembersTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('email_adfc')
                     ->searchable(),
                 TextColumn::make('email_private')
                     ->searchable(),
-                IconColumn::make('responded_to_questionaire')
-                    ->sortable()
-                    ->boolean(),
+                // IconColumn::make('responded_to_questionaire')
+                //     ->sortable()
+                //     ->boolean(),
                 TextColumn::make('responded_to_questionaire_at')
                     ->sortable()
                     ->date()
@@ -56,6 +57,8 @@ class MembersTable
                         ->modalSubmitAction(false)
                         ->modalCancelAction(false),
                 ]),
-            ]);
+            ])
+            ->defaultSort('name', 'asc');
+        ;
     }
 }

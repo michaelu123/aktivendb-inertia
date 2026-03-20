@@ -92,7 +92,7 @@ class SbMembersTable
                     ->sortable(),
                 // ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label("")
+                    ->label("updated_at")
                     ->dateTime('d.m.Y H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -22,6 +22,8 @@ class MemberResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'name';
+    protected static bool $hasTitleCaseModelLabel = false;
+    protected static ?string $pluralModelLabel = 'Aktive Mitglieder ohne Serienbrief-Antwort';
     protected static string|UnitEnum|null $navigationGroup = "Serienbrief";
 
     public static function form(Schema $schema): Schema
@@ -59,6 +61,7 @@ class MemberResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->where("active", true)
             ->where(function (Builder $query) {
                 $query->whereNull('responded_to_questionaire')->orWhere('responded_to_questionaire', false);
             });

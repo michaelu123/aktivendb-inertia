@@ -33,7 +33,7 @@ new class extends Component implements HasSchemas {
 
                 Falls Du mit der Speicherung nicht einverstanden bist, löschen wir Deine Daten. Falls Du aktuell in
                 keiner AG / OG aktiv bist und auch nicht für Einsätze zur Verfügung stehst, bleiben Deine Daten in der
-                DB, Dein Eintrag wird aber auf inaktiv gesetzt. Die einzige andere Pflichtangabe ist Dein Name.<br><br>
+                DB, Dein Eintrag wird aber auf inaktiv gesetzt.<br><br>
 
                 <strong>Bitte klicke am Ende des Fragebogens AUF JEDEN FALL auf Abschicken</strong>, auch dann, wenn Du
                 nichts geändert hast, damit wir wissen, dass wir die aktuelle Daten von Dir haben.
@@ -201,27 +201,30 @@ new class extends Component implements HasSchemas {
         $data = $this->form->getState();
         $genderCnt = count($data['gender']);
         $data['gender'] = $genderCnt == 1 ? $data['gender'][0] : null;
+        $data['responded_to_questionaire'] = true;
+        $data['responded_to_questionaire_at'] = now();
+        $newTeams = $data['teams'];
+        $oldTeams = $this->oldTeams;
 
-        if ($this->member_id == 0) {
+        if ($this->member_id == 0) { // Erstanmeldung
             $m = Member::where("first_name", $data["first_name"])->where("last_name", $data["last_name"])->first();
+            $data["aktiv"] = 0;
             if (!isset($m)) {
                 $data["name"] = $data["last_name"] . ", " . $data["first_name"];
-                $data["aktiv"] = 0;
+                $data["active"] = 0;
                 $m = Member::create($data);
                 $this->member_id = $m->id;
-            } else {
+            } else { // doch schon in der AktivenDB
                 $this->member_id = $m->id;
-                $data["aktiv"] = $m->active;
+                $data["active"] = $m->active && count($newTeams) > 0;
                 $m->update($data);
             }
         } else {
             $m = Member::find($this->member_id);
-            $data["aktiv"] = $m->active;
+            $data["active"] = $data["aktiv"] && count($newTeams) > 0;
             $m->update($data);
         }
         $data['member_id'] = $this->member_id;
-        $newTeams = $data['teams'];
-        $oldTeams = $this->oldTeams;
         $teams = [];
         foreach ($newTeams as $newTeam) {
             if (in_array($newTeam, $oldTeams)) {

@@ -66,7 +66,8 @@ new class extends Component {
                 } else if ($this->vorschau) {
                     $this->log[] = "an '{$recipients}' wäre gesendet worden.";
                 } else {
-                    Mail::to($recipients)->send(new SerienBrief($recordId));
+                    $anrede = "Liebe(r) " . $member->first_name . " " . $member->last_name;
+                    Mail::to($recipients)->send(new SerienBrief($recordId, $anrede));
                     $this->log[] = "an '{$recipients}' gesendet.";
                 }
             } catch (\Exception $e) {

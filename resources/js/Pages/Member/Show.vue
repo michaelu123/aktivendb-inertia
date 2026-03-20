@@ -197,10 +197,7 @@
                         :error="
                             !!editedItem.errors.responded_to_questionaire_at
                         "
-                        :error_txt="
-                            editedItem.errors
-                                .next_first_airesponded_to_questionaire_atd_training
-                        "
+                        :error_txt="editedItem.errors.next_first_aid_training"
                         label="Datum Fragebogen"
                         :maxDate="today"
                     />
