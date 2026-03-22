@@ -62,21 +62,19 @@ new class extends Component implements HasSchemas {
 
     public $h1, $p, $ok, $agSel;
 
-    public string $idEnc;
-
     public function mount(Request $request, $id): void
     {
-        if (strlen($id) > 20) { // TODO
-            $id = Crypt::decryptString($id);
+        if ($id == "0") {
+            $id = 0;
+        } else {
+            $id = (int) Crypt::decryptString($id);
         }
-        $this->idEnc = Crypt::encryptString($id); // TODO
-
         if ($id != 0) {
             $member = Member::with("teams")->find((int) $id);
             $id = $member != null ? $member->id : 0;
         }
         $this->member_id = $id;
-        if ($id == 0) {
+        if ($this->member_id == 0) {
             $memberData = [];
             $this->h1 = $this->h1E;
             $this->p = $this->pE;
@@ -207,17 +205,18 @@ new class extends Component implements HasSchemas {
         $oldTeams = $this->oldTeams;
 
         if ($this->member_id == 0) { // Erstanmeldung
+            $data["aktiv"] = 0; // was not in form
             $m = Member::where("first_name", $data["first_name"])->where("last_name", $data["last_name"])->first();
-            $data["aktiv"] = 0;
-            if (!isset($m)) {
+            if (isset($m)) {
+                // doch schon in der AktivenDB
+                $this->member_id = $m->id;
+                $data["active"] = $m->active && count($newTeams) > 0;
+                $m->update($data);
+            } else {
                 $data["name"] = $data["last_name"] . ", " . $data["first_name"];
                 $data["active"] = 0;
                 $m = Member::create($data);
                 $this->member_id = $m->id;
-            } else { // doch schon in der AktivenDB
-                $this->member_id = $m->id;
-                $data["active"] = $m->active && count($newTeams) > 0;
-                $m->update($data);
             }
         } else {
             $m = Member::find($this->member_id);

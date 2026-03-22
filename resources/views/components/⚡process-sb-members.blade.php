@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Member;
+use App\Models\MemberTeamAktionen;
 use Livewire\Component;
 use Filament\Notifications\Notification;
 use App\Models\SbMember;
@@ -11,10 +13,12 @@ new class extends Component {
     public array $log = [];
     public int $totalRecords = 0;
     public string $id;
-    public $vorschau = true;
+    public MemberTeamAktionen $memberTeamAktionen;
 
-    public function mount(array $recordIds, string $id): void
+
+    public function mount(array $recordIds, string $id, MemberTeamAktionen $memberTeamAktionen): void
     {
+        $this->memberTeamAktionen = $memberTeamAktionen;
         $this->recordIds = $recordIds;
         $this->id = $id;
         $this->totalRecords = count($recordIds);
@@ -23,32 +27,21 @@ new class extends Component {
 
     public function process(): void
     {
-
-        if ($this->processedCount >= $this->totalRecords) {
-            $this->log[] = 'Alle Mitglieder wurden verarbeitet.';
-            $this->dispatch('processing-finished');
-            Notification::make()
-                ->title('Übernahme abgeschlossen')
-                ->success()
-                ->send();
-            return;
-        }
-
         $recordId = $this->recordIds[$this->processedCount];
-        $sbMember = SbMember::find($recordId);
+        $sbMember = SbMember::with('teams')->find($recordId);
+        $member = Member::find($sbMember->member_id);
+
 
         if ($sbMember) {
-            $this->log[] = "Verarbeite {$sbMember->first_name} {$sbMember->last_name} (ID: {$sbMember->id})...";
+            $this->log[] = "Übernehme {$sbMember->first_name} {$sbMember->last_name} (ID: {$sbMember->id})...";
 
             try {
-                // This is where the actual logic to transfer the member would go.
-                // For demonstration, I'll just log it and simulate work.
-                // In a real scenario, you would create a new Member and delete the SbMember.
-                // DB::transaction(function () use ($sbMember) {
-                //     \App\Models\Member::create($sbMember->toArray());
-                //     $sbMember->delete();
-                // });
-
+                $teams = $sbMember->teams()->get();
+                foreach ($teams as $team) {
+                    Log::info("Member " . $sbMember->first_name . " " . $sbMember->last_name . ":  Team " . $team->name . " (" . $team->team_sbmembers->aktion . ")" . " Email " . $team->email);
+                    $this->memberTeamAktionen->aktion($sbMember, $member, $team);
+                }
+                $sbMember->update(["eingetragen" => now()]);
                 $this->log[] = "-> '{$sbMember->first_name} {$sbMember->last_name}' erfolgreich übernommen.";
             } catch (\Exception $e) {
                 Log::error("Fehler bei der Übernahme von SbMember ID {$sbMember->id}: " . $e->getMessage());
@@ -63,12 +56,14 @@ new class extends Component {
         if ($this->processedCount < $this->totalRecords) {
             $this->dispatch('next-item');
         } else {
-            $this->log[] = 'Alle Mitglieder wurden verarbeitet.';
+            $this->log[] = 'Alle Serienbrief-Antworten wurden verarbeitet.';
+            $this->log[] = 'E-Mails an die Leitungen werden gesendet.';
             $this->dispatch('processing-finished');
             Notification::make()
                 ->title('Übernahme abgeschlossen')
                 ->success()
                 ->send();
+            $this->memberTeamAktionen->sendMailsToTeamLeiter(); // TODO
         }
     }
 };
@@ -79,7 +74,7 @@ new class extends Component {
         init() {
             $wire.on('next-item', () => {
                 // Use a small timeout to allow UI to update before next request
-                setTimeout(() => $wire.process(), 2000);
+                setTimeout(() => $wire.process(), 10);
             });
             $wire.on('processing-finished', () => {
                 this.processing = false;
@@ -104,11 +99,6 @@ new class extends Component {
             </div>
         @endif
 
-        <x-filament::actions>
-            <label class="mb-4">
-                <x-filament::input.checkbox wire:model="vorschau" /> <span>Vorschau</span>
-            </label>
-        </x-filament::actions>
         <x-filament::actions>
             <x-filament::button x-show="!processing" wire:click="process" x-on:click="processing = true"
                 :disabled="$totalRecords === 0">

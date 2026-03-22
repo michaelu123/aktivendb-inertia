@@ -8,21 +8,16 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Crypt;
 
-class SerienBrief extends Mailable
+class LeitungsBrief extends Mailable
 {
     use Queueable, SerializesModels;
-    public string $sbUrl;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public string $member_id, public string $anrede)
+    public function __construct(public string $anrede, public array $add, public array $delete)
     {
-        $url = request()->url();
-        $x = strpos($url, "/livewire");
-        $this->sbUrl = substr($url, 0, $x) . "/sb/" . Crypt::encryptString($member_id);
     }
 
     /**
@@ -32,7 +27,7 @@ class SerienBrief extends Mailable
     {
         return new Envelope(
             from: new Address("aktivenmanagement@adfc-muenchen.de"),
-            subject: 'Aktualisierung der Mitglieder-Datenbank des ADFC München',
+            subject: 'Änderungen infolge SerienBrief-Antworten',
         );
     }
 
@@ -42,8 +37,7 @@ class SerienBrief extends Mailable
     public function content(): Content
     {
         return new Content(
-            html: 'mail.serienbrief',
-            text: 'mail.serienbrief-text',
+            html: 'mail.leitungsbrief',
         );
     }
 }

@@ -16,8 +16,7 @@
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
-/storage/pail
+/storage
 /vendor
 Homestead.json
 Homestead.yaml
@@ -28,4 +27,3 @@ env.*
 README.muh
 _ide_helper.php
 .phpstorm.meta.php
-storage

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SbMembers\Tables;
 
+use App\Models\MemberTeamAktionen;
 use App\Models\SbMember;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -20,7 +21,6 @@ class SbMembersTable
 {
     public static function configure(Table $table): Table
     {
-        $ids = [];
         return $table
             ->columns([
                 TextColumn::make('eingetragen')
@@ -108,26 +108,33 @@ class SbMembersTable
                 [
                     BulkActionGroup::make([
                         BulkAction::make('übernehmen1')
-                            ->label("Übernehmen")
+                            ->label("Selektierte übernehmen")
                             ->icon('heroicon-o-document-plus')
                             ->deselectRecordsAfterCompletion()
                             ->modalContent(function (Collection $sbMembers, BulkAction $action) {
                                 $ids = $sbMembers->pluck('id')->toArray();
+                                $memberTeamAktionen = new MemberTeamAktionen();
                                 return new HtmlString(
-                                    Blade::render('@livewire("⚡process-sb-members", ["recordIds" => $ids, "id" => $modalId])', [
-                                        'ids' => $ids,
-                                        // if this is no longer ok, look at the modal in Chrome inspector, to see how it is formed.
-                                        'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-" . $action->getNestingIndex(),
-                                    ])
+                                    Blade::render('@livewire("⚡process-sb-members", [
+                                            "recordIds" => $ids, 
+                                            "id" => $modalId,
+                                            "memberTeamAktionen" => $memberTeamAktionen
+                                        ])',
+                                        [
+                                            'ids' => $ids,
+                                            // if this is no longer ok, look at the modal in Chrome inspector, to see how it is formed.
+                                            'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-" . $action->getNestingIndex(),
+                                            'memberTeamAktionen' => $memberTeamAktionen
+                                        ]
+                                    )
                                 );
                             })
                             ->modalSubmitAction(false)
                             ->modalCancelAction(false),
-
                         DeleteBulkAction::make(),
                     ]),
                     Action::make('übernehmen2')
-                        ->label("Übernehmen")
+                        ->label("Alle noch nicht übernommenen übernehmen")
                         ->icon('heroicon-o-document-plus')
                         ->modalContent(function (Action $action) {
                             $ids = SbMember::whereNull('eingetragen')->pluck('id')->toArray();

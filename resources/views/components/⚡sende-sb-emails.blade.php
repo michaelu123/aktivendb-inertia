@@ -13,6 +13,7 @@ new class extends Component {
     public array $log = [];
     public int $totalRecords = 0;
     public string $id;
+    public bool $error = false;
     public $vorschau = true;
 
     public function mount(array $recordIds, string $id): void
@@ -73,22 +74,30 @@ new class extends Component {
             } catch (\Exception $e) {
                 Log::error("Fehler beim Senden der Email: " . $e->getMessage());
                 $this->log[] = "-> FEHLER beim Senden der Email: " . $e->getMessage();
+                $this->dispatch('processing-finished');
+                $this->error = true;
+                Notification::make()
+                    ->title('Fehler beim Email-Versand')
+                    ->status("error")
+                    ->send();
+                return;
             }
         } else {
             $this->log[] = "-> Mitglied mit ID {$recordId} nicht gefunden. Übersprungen.";
         }
 
-        $this->processedCount++;
-
-        if ($this->processedCount < $this->totalRecords) {
-            $this->dispatch('next-item');
-        } else {
-            $this->log[] = 'Emails an alle Mitglieder gesendet.';
-            $this->dispatch('processing-finished');
-            Notification::make()
-                ->title($this->vorschau ? 'Vorschau abgeschlossen' : 'Emails senden abgeschlossen')
-                ->success()
-                ->send();
+        if (!$this->error) {
+            $this->processedCount++;
+            if ($this->processedCount < $this->totalRecords) {
+                $this->dispatch('next-item');
+            } else {
+                $this->log[] = 'Emails an alle Mitglieder gesendet.';
+                $this->dispatch('processing-finished');
+                Notification::make()
+                    ->title($this->vorschau ? 'Vorschau abgeschlossen' : 'Emails senden abgeschlossen')
+                    ->success()
+                    ->send();
+            }
         }
     }
 };
@@ -118,7 +127,7 @@ new class extends Component {
         <p class="mt-2 mb-10 text-sm text-gray-500 dark:text-gray-400">
             Gesendet: {{ $processedCount }} / {{ $totalRecords }}
         </p>
-        @if($processedCount < $totalRecords && $this->processedCount > 0)
+        @if($processedCount < $totalRecords && $processedCount > 0 && !$error)
             <div class="mt-2">
                 <x-filament::loading-indicator class="h-5 w-5" />
             </div>

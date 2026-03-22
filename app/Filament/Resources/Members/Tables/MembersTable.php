@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Members\Tables;
 
+use App\Models\Member;
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 // use Filament\Tables\Columns\IconColumn;
@@ -10,6 +12,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\HtmlString;
 
 class MembersTable
@@ -37,6 +40,15 @@ class MembersTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                Action::make("showform")
+                    ->label("Formular zeigen")
+                    ->icon("heroicon-o-eye")
+                    ->url(function (Member $record) {
+                        $url = request()->url();
+                        $x = strpos($url, "/admin");
+                        return route("serienbrief", ["id" => Crypt::encryptString($record->id)]);
+                    })
+                    ->openUrlInNewTab()
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
