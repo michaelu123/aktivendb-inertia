@@ -14,7 +14,8 @@ new class extends Component {
     public int $totalRecords = 0;
     public string $id;
     public MemberTeamAktionen $memberTeamAktionen;
-
+    public $teamNamesToSendEmailsTo = [];
+    public int $phase = 0;
 
     public function mount(array $recordIds, string $id, MemberTeamAktionen $memberTeamAktionen): void
     {
@@ -27,43 +28,66 @@ new class extends Component {
 
     public function process(): void
     {
-        $recordId = $this->recordIds[$this->processedCount];
-        $sbMember = SbMember::with('teams')->find($recordId);
-        $member = Member::find($sbMember->member_id);
-
-
-        if ($sbMember) {
-            $this->log[] = "Übernehme {$sbMember->first_name} {$sbMember->last_name} (ID: {$sbMember->id})...";
-
-            try {
-                $teams = $sbMember->teams()->get();
-                foreach ($teams as $team) {
-                    Log::info("Member " . $sbMember->first_name . " " . $sbMember->last_name . ":  Team " . $team->name . " (" . $team->team_sbmembers->aktion . ")" . " Email " . $team->email);
-                    $this->memberTeamAktionen->aktion($sbMember, $member, $team);
-                }
-                $sbMember->update(["eingetragen" => now()]);
-                $this->log[] = "-> '{$sbMember->first_name} {$sbMember->last_name}' erfolgreich übernommen.";
-            } catch (\Exception $e) {
-                Log::error("Fehler bei der Übernahme von SbMember ID {$sbMember->id}: " . $e->getMessage());
-                $this->log[] = "-> FEHLER bei der Übernahme von '{$sbMember->first_name} {$sbMember->last_name}': " . $e->getMessage();
-            }
-        } else {
-            $this->log[] = "-> Mitglied mit ID {$recordId} nicht gefunden. Übersprungen.";
-        }
-
-        $this->processedCount++;
-
-        if ($this->processedCount < $this->totalRecords) {
-            $this->dispatch('next-item');
-        } else {
+        if ($this->processedCount >= $this->totalRecords) {
             $this->log[] = 'Alle Serienbrief-Antworten wurden verarbeitet.';
-            $this->log[] = 'E-Mails an die Leitungen werden gesendet.';
             $this->dispatch('processing-finished');
             Notification::make()
                 ->title('Übernahme abgeschlossen')
                 ->success()
                 ->send();
-            $this->memberTeamAktionen->sendMailsToTeamLeiter(); // TODO
+            return;
+        }
+
+        if ($this->phase == 0) {
+            $recordId = $this->recordIds[$this->processedCount];
+            $sbMember = SbMember::with('teams')->find($recordId);
+            $member = Member::find($sbMember->member_id);
+
+            if ($sbMember) {
+                $this->log[] = "Übernehme {$sbMember->first_name} {$sbMember->last_name} (ID: {$sbMember->id})...";
+
+                try {
+                    $teams = $sbMember->teams()->get();
+                    foreach ($teams as $team) {
+                        Log::info("Member " . $sbMember->first_name . " " . $sbMember->last_name . ":  Team " . $team->name . " (" . $team->team_sbmembers->aktion . ")" . " Email " . $team->email);
+                        $this->memberTeamAktionen->aktion($sbMember, $member, $team);
+                    }
+                    $sbMember->update(["eingetragen" => now()]);
+                    $this->log[] = "-> '{$sbMember->first_name} {$sbMember->last_name}' erfolgreich übernommen.";
+                } catch (\Exception $e) {
+                    Log::error("Fehler bei der Übernahme von SbMember ID {$sbMember->id}: " . $e->getMessage());
+                    $this->log[] = "-> FEHLER bei der Übernahme von '{$sbMember->first_name} {$sbMember->last_name}': " . $e->getMessage();
+                }
+            } else {
+                $this->log[] = "-> Mitglied mit ID {$recordId} nicht gefunden. Übersprungen.";
+            }
+
+            $this->processedCount++;
+
+            if ($this->processedCount < $this->totalRecords) {
+                $this->dispatch('next-item');
+            } else {
+                $this->processedCount = 0;
+                $this->phase = 1;
+                $this->teamNamesToSendEmailsTo = $this->memberTeamAktionen->teamNamesToSendEmailsTo();
+                $this->totalRecords = count($this->teamNamesToSendEmailsTo);
+                if ($this->totalRecords > 0) {
+                    $this->log[] = 'E-Mails an die Leitungen werden gesendet.';
+                }
+                $this->dispatch('next-item');
+            }
+        } else { // second phase, send emails to Team leaders
+            $teamName = $this->teamNamesToSendEmailsTo[$this->processedCount];
+            $this->log[] = "Sende E-Mail an {$teamName}";
+            try {
+                $this->memberTeamAktionen->sendMailToTeamLeiter($teamName);
+            } catch (\Exception $e) {
+                Log::error("Fehler beim E-Mail senden: " . $e->getMessage());
+                $this->log[] = "-> FEHLER beim Senden der E-Mail: " . $e->getMessage();
+            }
+            $this->processedCount++;
+
+            $this->dispatch('next-item');
         }
     }
 };
@@ -101,7 +125,7 @@ new class extends Component {
 
         <x-filament::actions>
             <x-filament::button x-show="!processing" wire:click="process" x-on:click="processing = true"
-                :disabled="$totalRecords === 0">
+                :disabled="$totalRecords === 0 || $phase == 1">
                 Start
             </x-filament::button>
             <x-filament::button x-show="processing" disabled class="cursor-wait">

@@ -75,38 +75,35 @@ class MemberTeamAktionen implements Wireable
     }
   }
 
-  public function emailsToBeSent(): int
+  public function teamNamesToSendEmailsTo(): array
   {
-    $count = 0;
-    foreach (array_keys($this->leitungenMap) as $teamName) {
-      $add = $this->teamName2MemberNameAdd[$teamName];
-      $delete = $this->teamName2MemberNameDelete[$teamName];
-      $count += count($add) + count($delete);
-    }
-    return $count;
-  }
-
-  public function sendMailsToTeamLeiter()
-  {
+    $tn = [];
     foreach (array_keys($this->leitungenMap) as $teamName) {
       $add = $this->teamName2MemberNameAdd[$teamName] ?? [];
       $delete = $this->teamName2MemberNameDelete[$teamName] ?? [];
-      if (empty($add) && empty($delete)) {
-        continue;
+      if (!empty($add) || !empty($delete)) {
+        $tn[] = $teamName;
       }
-      if (str_starts_with($teamName, "OG")) {
-        $anrede = "Liebe Sprecher/Sprecherinnen der " . $teamName;
-      } else {
-        $anrede = "Liebe Leitung der " . $teamName;
-      }
-      $recipient = $this->leitungenMap[$teamName] ?? null;
-      if (null == $recipient) {
-        continue;
-      }
-      Mail::to($recipient)->send(new LeitungsBrief($anrede, $add, $delete));
-      sleep(1);
     }
+    return $tn;
   }
+
+  public function sendMailToTeamLeiter($teamName)
+  {
+    $add = $this->teamName2MemberNameAdd[$teamName] ?? [];
+    $delete = $this->teamName2MemberNameDelete[$teamName] ?? [];
+    if (str_starts_with($teamName, "OG")) {
+      $anrede = "Liebe Sprecher/Sprecherinnen der " . $teamName;
+    } else {
+      $anrede = "Liebe Leitung der " . $teamName;
+    }
+    $recipient = $this->leitungenMap[$teamName] ?? null;
+    if (null == $recipient) {
+      return;
+    }
+    Mail::to($recipient)->send(new LeitungsBrief($anrede, $add, $delete));
+  }
+
 
   public function aktion(SbMember $sbMember, Member $member, Team $team)
   {

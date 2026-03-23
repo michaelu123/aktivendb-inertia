@@ -29,9 +29,9 @@ use Illuminate\Support\HtmlString;
   <p>Zur Erläuterung:</p>
   <p>
     Wenn ein Mitglied das Formular zur Aktualisierung der AktivenDB ausfüllt, sind Häkchen gesetzt
-    für die AGs/OGs, in denen er als Mitglied geführt wird. Löscht er eins dieser Häkchen, wird er
-    automatisch aus der AG/OG entfernt. Setzt er ein Häkchen bei einer neuen AG/OG,
-    wird er aber nicht automatisch Mitglied der AG/OG. In beiden Fällen werdet Ihr als AG/OG-Leiter mit dieser Email
+    für die AGs/OGs, in denen es als Mitglied geführt wird. Löscht es eins dieser Häkchen, wird es
+    automatisch aus der AG/OG entfernt. Setzt es ein Häkchen bei einer neuen AG/OG,
+    wird es aber nicht automatisch Mitglied der AG/OG. In beiden Fällen werdet Ihr als AG/OG-Leiter mit dieser Email
     informiert.
   </p>
   <p>
