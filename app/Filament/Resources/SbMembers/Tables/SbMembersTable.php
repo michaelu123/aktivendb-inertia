@@ -138,12 +138,20 @@ class SbMembersTable
                         ->icon('heroicon-o-document-plus')
                         ->modalContent(function (Action $action) {
                             $ids = SbMember::whereNull('eingetragen')->pluck('id')->toArray();
+                            $memberTeamAktionen = new MemberTeamAktionen();
                             $html = new HtmlString(
-                                Blade::render('@livewire("⚡process-sb-members", ["recordIds" => $ids, "id" => $modalId])', [
-                                    'ids' => $ids,
-                                    // if this is no longer ok, look at the modal in Chrome inspector, to see how it is formed.
-                                    'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-" . $action->getNestingIndex(),
-                                ])
+                                Blade::render('@livewire("⚡process-sb-members", [
+                                        "recordIds" => $ids, 
+                                        "id" => $modalId,
+                                        "memberTeamAktionen" => $memberTeamAktionen
+                                    ])',
+                                    [
+                                        'ids' => $ids,
+                                        // if this is no longer ok, look at the modal in Chrome inspector, to see how it is formed.
+                                        'modalId' => "fi-" . $action->getLivewire()->getId() . "-action-" . $action->getNestingIndex(),
+                                        'memberTeamAktionen' => $memberTeamAktionen
+                                    ]
+                                )
                             );
                             // Log::info("HTML: " . $html);
                             return $html;

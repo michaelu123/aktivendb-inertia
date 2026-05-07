@@ -169,6 +169,7 @@
                                 :editedItem="editedItem"
                                 :memberRoles="memberRoles"
                                 :allMembers="allMembers"
+                                :teamNames="teamNames"
                             ></AddMemberToTeamDialog>
 
                             <v-spacer></v-spacer>
@@ -241,6 +242,7 @@ const props = defineProps({
     memberIndex: -1,
     allMembers: Array,
     memberRoles: Array,
+    teamNames: String,
 });
 
 let readonly = computed(() => {
@@ -400,6 +402,7 @@ function showTeamMemberItem(item, readonly) {
             team: props.team.id,
             readonly,
             memberIndex,
+            "memberId": item.id,
         }),
     );
 }

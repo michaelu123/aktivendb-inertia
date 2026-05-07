@@ -93,6 +93,7 @@ class TeamController extends Controller
     public function showWithDialog(Team $team, Request $request)
     {
         $memberIndex = $request->query("memberIndex");
+        $memberId = $request->query("memberId");
         if (Gate::allows("edit-team-details", $team->id)) {
             $team->load([
                 "members" => function ($query) {
@@ -111,6 +112,10 @@ class TeamController extends Controller
         foreach ($team->members as $member) {
             $member->member_role_title = MemberRole::roleName($member->team_member->member_role_id);
         }
+        $member = Member::where("id", $memberId)->with(["teams"])->first();
+        $teamNames = $member ? $member->teams->pluck('name')->toArray() : [];
+        $teamNames = array_filter($teamNames, fn($name) => $name != $team->name);
+        $teamNames = implode(", ", $teamNames);
         return inertia(
             'Team/Show',
             [
@@ -119,6 +124,7 @@ class TeamController extends Controller
                 "memberIndex" => $memberIndex,
                 "allMembers" => $allMembers,
                 "memberRoles" => $memberRoles,
+                "teamNames" => $teamNames,
             ]
         );
     }

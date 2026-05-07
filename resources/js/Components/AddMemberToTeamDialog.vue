@@ -60,6 +60,11 @@
                             :error="!!mtForm.errors.admin_comments"
                             :error-messages="mtForm.errors.admin_comments"
                         ></v-textarea>
+                        <v-text-field
+                            v-model="teamNamesString"
+                            label="Außerdem Mitglied in"
+                            readonly
+                        ></v-text-field>
                     </v-form>
                 </v-container>
             </v-card-text>
@@ -89,7 +94,11 @@ const props = defineProps([
     "editedItem",
     "memberRoles",
     "allMembers",
+    "teamNames",
 ]);
+
+const teamNamesString = computed(() => props.teamNames 
+);
 
 const r = reactive({
     sname: "",
