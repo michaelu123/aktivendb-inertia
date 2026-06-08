@@ -8,6 +8,10 @@
 <body>
   <p>
     {{ $anrede }},<br /><br />
+    schon mehrfach haben wir Dich angeschrieben, mit der Bitte, Deine Daten in der AktivenDB auf Aktualität zu
+    überprüfen. Leider bisher ohne Erfolg. Bitte trage Deine Daten dieses Mal wie unten angegeben ein, sonst
+    sind wir leider gezwungen, <strong>Deine ADFC Nutzerkennung zu sperren</strong>.<br /><br />
+
     In der Aktiven-Datenbank des ADFC München möchten wir die Daten von
     Mitgliedern verwalten, die den ADFC München aktiv unterstützen, sei es
     durch Mitarbeit in einer AG, als Tourenleiter, als Info-Stand-Betreuer usw.<br />

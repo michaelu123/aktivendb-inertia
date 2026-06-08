@@ -61,15 +61,15 @@ new class extends Component {
                 if ($member->email_private) {
                     $recipients[] = $member->email_private;
                 }
-                $recipients = implode(',', $recipients);
+                $recipientsS = implode(',', $recipients);
                 if (empty($recipients)) {
                     $this->log[] = "'{$member->first_name} {$member->last_name}' hat keine Email-Adresse.";
                 } else if ($this->vorschau) {
-                    $this->log[] = "an '{$recipients}' wäre gesendet worden.";
+                    $this->log[] = "an '{$recipientsS}' wäre gesendet worden.";
                 } else {
                     $anrede = "Liebe(r) " . $member->first_name . " " . $member->last_name;
                     Mail::to($recipients)->send(new SerienBrief($recordId, $anrede));
-                    $this->log[] = "an '{$recipients}' gesendet.";
+                    $this->log[] = "an '{$recipientsS}' gesendet.";
                 }
             } catch (\Exception $e) {
                 Log::error("Fehler beim Senden der Email: " . $e->getMessage());

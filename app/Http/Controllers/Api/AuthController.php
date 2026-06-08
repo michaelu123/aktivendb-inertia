@@ -24,7 +24,7 @@ class AuthController extends Controller
                 "email" => "Falsche Email oder Passwort"
             ]);
         }
-        $token = $request->user()->createToken("token", ['*'], now()->plus(hours: 4));
+        $token = $request->user()->createToken("token", ['*'], now()->addHours(4));
 
         return ['token' => $token->plainTextToken];
     }
