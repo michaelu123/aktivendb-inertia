@@ -87,8 +87,12 @@ new class extends Component implements HasSchemas {
                 $gender = [$gender => $gender];
             }
             $memberData['gender'] = $gender;
-            $memberData['teams'] = $member->teams->pluck('id', "name")->toArray();
-            $this->oldTeams = array_values($memberData["teams"]);
+
+            $allTeams = $member->teams->pluck('id')->toArray();
+            $vorstandId = Team::where('name', 'Vorstand')->value('id');
+            $this->oldTeams = array_values(array_filter($allTeams, fn($id) => $id != $vorstandId));
+            $memberData['teams'] = $this->oldTeams;
+
             $this->h1 = $this->h1R;
             $this->p = $this->pR;
             $this->ok = $this->okR;
@@ -103,10 +107,14 @@ new class extends Component implements HasSchemas {
         $teams = Team::orderBy('name')->get()->mapWithKeys(function (Team $team): array {
             return [$team->id => $team->name];
         });
-        $x = $teams->search("Vorstand");
-        unset($teams[$x]);
-        $x = $teams->search("Standby");
-        $teams[$x] = "in keiner AG aktiv, stehe aber für Einsätze zur Verfügung";
+        $vorstandId = $teams->search("Vorstand");
+        if ($vorstandId !== false) {
+            unset($teams[$vorstandId]);
+        }
+        $standbyId = $teams->search("Standby");
+        if ($standbyId !== false) {
+            $teams[$standbyId] = "in keiner AG aktiv, stehe aber für Einsätze zur Verfügung";
+        }
         return $schema
             ->components([
                 TextInput::make('first_name')
@@ -184,7 +192,10 @@ new class extends Component implements HasSchemas {
                     ->tel(),
                 CheckboxList::make('teams')->options($teams)
                     ->label("AGs und OGs")
-                    ->belowLabel($this->agSel),
+                    ->belowLabel($this->agSel)
+                    ->validationMessages([
+                        "in" => "Eine der ausgewählten AGs oder OGs ist ungültig."
+                    ]),
                 TextInput::make('interests')
                     ->label('Interessen')
                     ->belowLabel("Bitte gib Deine Interessen an."),
@@ -238,7 +249,7 @@ new class extends Component implements HasSchemas {
             }
         }
         SbMember::create($data)->teams()->attach($teams);
-        redirect()->route('sbdanke');
+        redirect()->route('sbdanke', ["idenc" => Crypt::encryptString($this->member_id)]);
     }
 }
 ?>

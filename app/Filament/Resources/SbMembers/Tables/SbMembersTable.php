@@ -137,7 +137,7 @@ class SbMembersTable
                         ->label("Alle noch nicht übernommenen übernehmen")
                         ->icon('heroicon-o-document-plus')
                         ->modalContent(function (Action $action) {
-                            $ids = SbMember::whereNull('eingetragen')->pluck('id')->toArray();
+                            $ids = SbMember::whereNull('eingetragen')->orderBy("id")->pluck('id')->toArray();
                             $memberTeamAktionen = new MemberTeamAktionen();
                             $html = new HtmlString(
                                 Blade::render('@livewire("⚡process-sb-members", [

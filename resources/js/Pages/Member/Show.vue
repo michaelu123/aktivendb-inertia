@@ -96,6 +96,7 @@
                         v-model="editedItem.email_adfc"
                         label="E-mail (ADFC)"
                         :readonly="readonly"
+                        :rules="[(v) => v.endsWith('@adfc-muenchen.de') || 'Adresse muß auf @adfc-muenchen.de enden']"
                         :error="!!editedItem.errors.email_adfc"
                         :error-messages="editedItem.errors.email_adfc"
                     ></v-text-field>
@@ -104,6 +105,7 @@
                         label="E-mail (Privat)"
                         required
                         :readonly="readonly"
+                        :rules="[(v) => !v.endsWith('@adfc-muenchen.de') || 'Adresse darf nicht auf @adfc-muenchen.de enden']"
                         :error="!!editedItem.errors.email_private"
                         :error-messages="editedItem.errors.email_private"
                     ></v-text-field>
