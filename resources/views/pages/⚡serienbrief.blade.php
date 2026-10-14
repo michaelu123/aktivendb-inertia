@@ -22,10 +22,11 @@ new class extends Component implements HasSchemas {
     public array $data = [];
     public int $member_id = 0;
     public array $oldTeams = [];
+    public $erstAnmeldung = false;
 
 
     public $h1R = "Rückmeldung erforderlich - Jährliche Aktualisierung unserer Aktiven-Datenbank";
-    public $pR = <<<EOD
+    public string $pR = <<<EOD
                 Wir möchten gerne möglichst korrekte Daten in unserer Datenbank von den aktiven Mitgliedern haben.
                 Deshalb bitten wir Dich jährlich, die über Dich gespeicherten Daten zu überprüfen und sie ggfs. zu
                 ändern. Teile uns bitte vor allem mit, ob Du überhaupt damit einverstanden bist, dass Deine Daten
@@ -43,27 +44,28 @@ new class extends Component implements HasSchemas {
     public $okR = "Bitte klicke auf Ja, wenn Du mit der Speicherung deiner Daten in unserer AktivenDB einverstanden bist. Wenn Du auf Nein klickst, <strong>klicke bitte am Ende des Formulars auf Abschicken!</strong> Sonst erfahren wir nichts von Deiner Entscheidung.";
 
     public $h1E = "Erstanmeldung - Deine Daten für unsere Aktiven-Datenbank";
-    public $pE = <<<EOD
+    public string $pE = <<<EOD
                 Wir bitten Dich, Deine Daten für unsere AktivenDB einzugeben. Außer Vor- und Nachnamen und der 
                 Zustimmung zur Speicherung sind aber keine Angaben zwingend. Wenn Du überhaupt nicht willst, 
                 daß Deine Daten gespeichert werden, schickst Du das Formular nicht ab.
                 EOD;
     public $okE = "Bitte klicke auf Ja, um zu bestätigen, daß Du mit der Speicherung deiner Daten in unserer AktivenDB einverstanden bist.";
 
-    public $agSelE = <<<EOD
+    public string $agSelE = <<<EOD
                 Bitte gib an, für welche Abeitsgruppen (AGs) und/oder Ortsgruppen (OGs) Du Dich interessierst. 
                 Von Deinem Wunsch wird die entsprechende AG/OG-Leitung informiert.
                 EOD;
-    public $agSelR = <<<EOD
+    public string $agSelR = <<<EOD
                 Bei gesetztem Häkchen bist Du in dieser Arbeitsgruppe (AG) und/oder Ortsgruppe (OG) Mitglied. 
                 Entfernst Du ein Häkchen, wird Deine Mitgliedschaft bei der AG/OG beendet.
                 Setzt Du ein neues Häkchen, wird die betreffende AG/OG-Leitung von Deinem Wunsch informiert, der AG/OG beizutreten. 
                 EOD;
 
-    public $h1, $p, $ok, $agSel;
+    public string $h1, $p, $ok, $agSel;
 
-    public function mount(Request $request, $id): void
+    public function mount(Request $request, string $id): void
     {
+        $member = null;
         if ($id == "0") {
             $id = 0;
         } else {
@@ -73,8 +75,9 @@ new class extends Component implements HasSchemas {
             $member = Member::with("teams")->find((int) $id);
             $id = $member != null ? $member->id : 0;
         }
+        $this->erstAnmeldung = $id == 0;
         $this->member_id = $id;
-        if ($this->member_id == 0) {
+        if ($this->erstAnmeldung) {
             $memberData = [];
             $this->h1 = $this->h1E;
             $this->p = $this->pE;
@@ -132,7 +135,7 @@ new class extends Component implements HasSchemas {
                     ])
                     ->required(),
                 Radio::make("aktiv")
-                    ->hidden($this->member_id == 0)
+                    ->hidden($this->erstAnmeldung)
                     ->label("Aktives Mitglied?")
                     ->belowLabel(new HtmlString("Wenn Du Dich (noch oder wieder) als aktives Mitglied siehst, klicke bitte auf Ja. Wenn Du auf Nein klickst, kannst Du noch Deine Daten aktualisieren, aber <strong>bitte klicke am Ende des Formulars auf Abschicken!</strong>"))
                     ->options([1 => "Ja", 0 => "Nein"])
@@ -215,23 +218,28 @@ new class extends Component implements HasSchemas {
         $newTeams = $data['teams'];
         $oldTeams = $this->oldTeams;
 
-        if ($this->member_id == 0) { // Erstanmeldung
+        if ($this->erstAnmeldung) {
             $data["aktiv"] = 0; // was not in form
             $m = Member::where("first_name", $data["first_name"])->where("last_name", $data["last_name"])->first();
             if (isset($m)) {
                 // doch schon in der AktivenDB
                 $this->member_id = $m->id;
-                $data["active"] = $m->active && count($newTeams) > 0;
+                $data["aktiv"] = $m->active && count($newTeams) > 0;
+                $data["admin_comments"] = "Fälschliche Erstanmeldung";
                 $m->update($data);
+                $allTeams = $m->teams->pluck('id')->toArray();
+                $vorstandId = Team::where('name', 'Vorstand')->value('id');
+                $oldTeams = array_values(array_filter($allTeams, fn($id) => $id != $vorstandId));
             } else {
+                $data["admin_comments"] = "Erstanmeldung";
                 $data["name"] = $data["last_name"] . ", " . $data["first_name"];
-                $data["active"] = 0;
+                $data["aktiv"] = 0;
                 $m = Member::create($data);
                 $this->member_id = $m->id;
             }
         } else {
             $m = Member::find($this->member_id);
-            $data["active"] = $data["aktiv"] && count($newTeams) > 0;
+            $data["aktiv"] = $data["aktiv"] && count($newTeams) > 0;
             $m->update($data);
         }
         $data['member_id'] = $this->member_id;
@@ -248,6 +256,9 @@ new class extends Component implements HasSchemas {
                 $teams[$oldTeam] = ["aktion" => "delete"];
             }
         }
+        if (!$this->erstAnmeldung) {
+            SbMember::where("first_name", $data["first_name"])->where("last_name", $data["last_name"])->delete();
+        }
         SbMember::create($data)->teams()->attach($teams);
         redirect()->route('sbdanke', ["idenc" => Crypt::encryptString($this->member_id)]);
     }
@@ -258,7 +269,7 @@ new class extends Component implements HasSchemas {
     <x-slot name="heading">
         <div class="flex flex-row justify-between items-center">
             <p class="lg:text-5xl text-2xl">
-                {{ $this->member_id == 0 ? "Erstanmeldung" : "Deine Daten mit Bitte um Bestätigung" }}
+                {{ $this->erstAnmeldung ? "Erstanmeldung" : "Deine Daten mit Bitte um Bestätigung" }}
             </p>
             <img src="/ADFC_MUENCHEN.PNG" alt="">
         </div>
